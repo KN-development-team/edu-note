@@ -6,7 +6,6 @@ on:
 
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  # 이미지 이름 (원하는 대로 수정 가능)
   SPRING_IMAGE_NAME: classmap-spring
   AI_IMAGE_NAME: classmap-ai
 
@@ -41,7 +40,6 @@ jobs:
       - name: Build and Push Spring Boot Image
         uses: docker/build-push-action@v5
         with:
-          # [중요] build.gradle이 루트에 있으므로 context는 점(.) 입니다.
           context: .
           file: ./Dockerfile
           push: true
@@ -53,7 +51,6 @@ jobs:
       - name: Build and Push AI Server Image
         uses: docker/build-push-action@v5
         with:
-          # [중요] ai-server 폴더를 루트에 복사해 넣었다고 가정합니다.
           context: ./ai-server
           file: ./ai-server/Dockerfile
           push: true
@@ -79,6 +76,7 @@ jobs:
             cd /home/ubuntu/my-project || mkdir -p /home/ubuntu/my-project && cd /home/ubuntu/my-project
             
             # 3. docker-compose.yml 파일 생성 (덮어쓰기)
+            # ▼▼▼ [수정됨] AWS 설정 4줄이 추가되었습니다 ▼▼▼
             cat <<EOF > docker-compose.yml
             version: '3.8'
             services:
@@ -92,11 +90,18 @@ jobs:
                   - SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}
                   - AI_SERVER_URL=http://ai-server:8000
                   - OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+                  # [추가된 부분] AWS S3 연결을 위한 설정
+                  - AWS_REGION=ap-northeast-2
+                  - AWS_S3_BUCKET=edu-note-files-2025
+                  - AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+                  - AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
                 depends_on:
                   - ai-server
 
               ai-server:
                 image: ${{ secrets.DOCKER_USERNAME }}/${{ env.AI_IMAGE_NAME }}:latest
+                ports:
+                  - "8000:8000"
                 environment:
                   - OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
             EOF
