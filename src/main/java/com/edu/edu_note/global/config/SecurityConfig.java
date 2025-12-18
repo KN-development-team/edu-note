@@ -10,15 +10,19 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1. CSRF 보안 기능 끄기 (API 서버는 보통 끕니다)
+                // 1. CSRF 보안 비활성화 (API 서버는 보통 끔)
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // 2. 모든 요청에 대해 "인증 없이(permitAll)" 접근 허용
+                // 2. 요청 주소별 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**").permitAll()
+                        // 회원가입, 로그인은 누구나 접속 가능하게 허용
+                        .requestMatchers("/api/users/signup", "/api/users/login").permitAll()
+
+                        // 그 외 모든 요청은 인증(로그인) 필요
                         .anyRequest().authenticated()
                 );
 
