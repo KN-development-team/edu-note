@@ -37,3 +37,7 @@ out/
 .vscode/
 
 .env
+ai-server/venv/
+venv/
+
+**/__pycache__/
