@@ -33,10 +33,13 @@
 
 ########################################################3
 # AI 서버가 파일을 받아서 텍스트로 바꿔주는 기능
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from openai import OpenAI
 import os
 import shutil
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from openai import OpenAI
+from dotenv import load_dotenv
+# 환경 변수 로드 (.env 파일 읽기)
+load_dotenv()
 
 # 1. OpenAI 클라이언트 설정
 api_key = os.environ.get("OPENAI_API_KEY")

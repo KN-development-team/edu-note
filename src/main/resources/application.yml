@@ -7,7 +7,6 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,27 +16,38 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   # AWS 관련 설정 (나중에 쓸 것, 에러 방지용)
-#  cloud:
-#    aws:
-#      s3:
-#        bucket: ${AWS_S3_BUCKET}
-#      region:
-#        static: ${AWS_REGION}
-#      credentials:
-#        access-key: ${AWS_ACCESS_KEY_ID}
-#        secret-key: ${AWS_SECRET_ACCESS_KEY}
   cloud:
     aws:
       s3:
-        bucket: edu-note-files
+        bucket: ${AWS_S3_BUCKET}
       region:
-        static: ap-northeast-2
+        static: ${AWS_REGION}
       credentials:
         access-key: ${AWS_ACCESS_KEY_ID}
         secret-key: ${AWS_SECRET_ACCESS_KEY}
+#  cloud:
+#    aws:
+#      s3:
+#        bucket: edu-note-files
+#      region:
+#        static: ap-northeast-2
+#      credentials:
+#        access-key: ${AWS_ACCESS_KEY_ID}
+#        secret-key: ${AWS_SECRET_ACCESS_KEY}
+  servlet:
+    multipart:
+      max-file-size: 1000MB       # 파일 하나당 최대 크기 (넉넉하게)
+      max-request-size: 1000MB    # 요청 전체 최대 크기
 
 # AI 서버 주소도 환경변수 처리
+#ai:
+#  server:
+#    url: ${AI_SERVER_URL}
+
 ai:
   server:
-    url: ${AI_SERVER_URL}
+    url: http://localhost:8000
+
+
+
 
