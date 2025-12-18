@@ -25,24 +25,11 @@ spring:
       credentials:
         access-key: ${AWS_ACCESS_KEY_ID}
         secret-key: ${AWS_SECRET_ACCESS_KEY}
-#  cloud:
-#    aws:
-#      s3:
-#        bucket: edu-note-files
-#      region:
-#        static: ap-northeast-2
-#      credentials:
-#        access-key: ${AWS_ACCESS_KEY_ID}
-#        secret-key: ${AWS_SECRET_ACCESS_KEY}
   servlet:
     multipart:
       max-file-size: 1000MB       # 파일 하나당 최대 크기 (넉넉하게)
       max-request-size: 1000MB    # 요청 전체 최대 크기
 
-# AI 서버 주소도 환경변수 처리
-#ai:
-#  server:
-#    url: ${AI_SERVER_URL}
 
 ai:
   server:
