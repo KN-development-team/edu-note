@@ -10,6 +10,8 @@ public class EduNoteApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(EduNoteApplication.class, args);
+
+		System.out.println("SPRING_DATASOURCE_URL=" + System.getenv("SPRING_DATASOURCE_URL"));
 	}
 
 }
