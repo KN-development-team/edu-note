@@ -47,6 +47,11 @@ client = OpenAI(api_key=api_key)
 
 app = FastAPI()
 
+# summary.py의 라우터를 summary_router로 등록
+from summary import router as summary_router
+app.include_router(summary_router)
+
+
 @app.get("/")
 def read_root():
     return {"message": "AI Server Running"}
