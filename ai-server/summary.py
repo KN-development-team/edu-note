@@ -38,7 +38,7 @@ class SummaryService:
     def __init__(self):
         self.api_key = os.getenv("GOOGLE_API_KEY")
         genai.configure(api_key = self.api_key) # import한 genai 모듈에 api_key 저장
-        self.model = genai.GenerativeModel("gemini-1.5-flash")
+        self.model = genai.GenerativeModel("gemini-3-pro-preview")
 
     def generate_summary(self, content: str) -> str:
         try:
