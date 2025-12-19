@@ -76,7 +76,6 @@ jobs:
             cd /home/ubuntu/my-project || mkdir -p /home/ubuntu/my-project && cd /home/ubuntu/my-project
             
             # 3. docker-compose.yml 파일 생성 (덮어쓰기)
-            # ▼▼▼ [수정됨] AWS 설정 4줄이 추가되었습니다 ▼▼▼
             cat <<EOF > docker-compose.yml
             version: '3.8'
             services:
@@ -85,14 +84,18 @@ jobs:
                 ports:
                   - "8080:8080"
                 environment:
-                  - SPRING_DATASOURCE_URL=jdbc:postgresql://${{ secrets.DB_HOST }}:5432/postgres
-                  - SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }}
-                  - SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}
+                  # ▼▼▼ [수정됨] 님의 GitHub Secrets 이름과 똑같이 맞췄습니다 ▼▼▼
+                  - SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
+                  - SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
+                  - SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+            
                   - AI_SERVER_URL=http://ai-server:8000
                   - OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-                  # [추가된 부분] AWS S3 연결을 위한 설정
+            
+                  # [AWS S3 설정]
                   - AWS_REGION=ap-northeast-2
                   - AWS_S3_BUCKET=edu-note-files-2025
+                  # (이 두 개는 아직 Secrets에 없으면 꼭 추가해야 합니다!)
                   - AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
                   - AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
                 depends_on:
