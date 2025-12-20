@@ -1,6 +1,6 @@
 package com.edu.edu_note.domain.summary.entity;
 
-import com.edu.edu_note.domain.record.entity.VoiceRecord;
+import com.edu.edu_note.domain.stt.entity.VoiceRecord;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
