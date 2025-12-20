@@ -1,5 +1,57 @@
+//package com.edu.edu_note.global.jwt;
+//
+//import io.jsonwebtoken.Jwts;
+//import io.jsonwebtoken.SignatureAlgorithm;
+//import io.jsonwebtoken.security.Keys;
+//import org.springframework.beans.factory.annotation.Value;
+//import org.springframework.stereotype.Component;
+//
+//import java.security.Key;
+//import java.util.Date;
+//
+//@Component
+//public class JwtTokenProvider {
+//
+//    private final Key key;
+//    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60; // 1시간
+//    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7; // 7일
+//
+//    // application.yml에서 비밀키 가져오기
+//    public JwtTokenProvider(@Value("${JWT_SECRET_KEY}") String secretKey) {
+//        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+//    }
+//
+//    // Access Token 생성
+//    public String createAccessToken(Long userId, String email) {
+//        return createToken(userId, email, ACCESS_TOKEN_EXPIRE_TIME);
+//    }
+//
+//    // Refresh Token 생성
+//    public String createRefreshToken(Long userId, String email) {
+//        return createToken(userId, email, REFRESH_TOKEN_EXPIRE_TIME);
+//    }
+//
+//    // 실제 토큰 생성 로직
+//    private String createToken(Long userId, String email, long expireTime) {
+//        Date now = new Date();
+//        Date expiryDate = new Date(now.getTime() + expireTime);
+//
+//        return Jwts.builder()
+//                .setSubject(email)                     // 토큰 제목 (이메일)
+//                .claim("userId", userId)               // 비공개 클레임 (사용자 ID)
+//                .setIssuedAt(now)                      // 발행 시간
+//                .setExpiration(expiryDate)             // 만료 시간
+//                .signWith(key, SignatureAlgorithm.HS256) // 암호화 알고리즘
+//                .compact();
+//    }
+//}
+
+
+
 package com.edu.edu_note.global.jwt;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -16,7 +68,6 @@ public class JwtTokenProvider {
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60; // 1시간
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7; // 7일
 
-    // application.yml에서 비밀키 가져오기
     public JwtTokenProvider(@Value("${JWT_SECRET_KEY}") String secretKey) {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
@@ -31,17 +82,39 @@ public class JwtTokenProvider {
         return createToken(userId, email, REFRESH_TOKEN_EXPIRE_TIME);
     }
 
-    // 실제 토큰 생성 로직
     private String createToken(Long userId, String email, long expireTime) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expireTime);
 
         return Jwts.builder()
-                .setSubject(email)                     // 토큰 제목 (이메일)
-                .claim("userId", userId)               // 비공개 클레임 (사용자 ID)
-                .setIssuedAt(now)                      // 발행 시간
-                .setExpiration(expiryDate)             // 만료 시간
-                .signWith(key, SignatureAlgorithm.HS256) // 암호화 알고리즘
+                .setSubject(email)
+                .claim("userId", userId)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    // [추가된 부분] 토큰에서 사용자 이메일(Subject) 추출
+    public String getUserEmail(String token) {
+        return parseClaims(token).getSubject();
+    }
+
+    // [추가된 부분] 토큰 유효성 검사
+    public boolean validateToken(String token) {
+        try {
+            parseClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }
