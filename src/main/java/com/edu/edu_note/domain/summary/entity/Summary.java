@@ -1,6 +1,7 @@
 package com.edu.edu_note.domain.summary.entity;
 
 import com.edu.edu_note.domain.stt.entity.VoiceRecord;
+import com.edu.edu_note.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "summary")
-public class Summary {
+public class Summary extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

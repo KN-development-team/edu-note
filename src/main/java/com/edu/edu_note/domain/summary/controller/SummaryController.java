@@ -1,6 +1,5 @@
 package com.edu.edu_note.domain.summary.controller;
 
-import com.edu.edu_note.domain.summary.dto.SummaryCreateRequest;
 import com.edu.edu_note.domain.summary.dto.SummaryResponse;
 import com.edu.edu_note.domain.summary.service.SummaryService;
 import com.edu.edu_note.global.auth.CustomUserDetails;
@@ -22,20 +21,19 @@ public class SummaryController {
      */
 
     @PostMapping("/{recordId}/summary")
-    public ResponseEntity<ApiResponse<SummaryResponse>> craeteSummary(
+    public ResponseEntity<ApiResponse<SummaryResponse>> createSummary(
             @PathVariable Long recordId,
-            @RequestBody SummaryCreateRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
                 Long userId = userDetails.getUser().getId();
-                SummaryResponse summaryResponse = summaryService.createSummary(recordId, userId);
+                SummaryResponse summaryResponse = summaryService.createSummary(recordId, userId); // 응답 dto summaryResponse에 반환값 매핑
 
-                return ResponseEntity
-                        .status(HttpStatus.CREATED)
-                        .body(ApiResponse.of(
-                                201,
+                return ResponseEntity.ok(
+                        ApiResponse.success(
                                 "AI 요약이 완료되었습니다.",
                                 summaryResponse
                         ));
     }
+
+
 }
