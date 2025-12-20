@@ -28,7 +28,7 @@ public class SummaryController {
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
                 Long userId = userDetails.getUser().getId();
-                SummaryResponse summaryResponse = summaryService.createSummary(recordId, userId, request.getContent());
+                SummaryResponse summaryResponse = summaryService.createSummary(recordId, userId);
 
                 return ResponseEntity
                         .status(HttpStatus.CREATED)

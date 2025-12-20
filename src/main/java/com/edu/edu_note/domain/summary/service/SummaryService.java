@@ -26,7 +26,7 @@ public class SummaryService {
     private final WebClient webClient;
 
     @Transactional
-    public SummaryResponse createSummary(Long recordId, Long userId, String content) {
+    public SummaryResponse createSummary(Long recordId, Long userId) {
         // record 존재 여부 확인
         VoiceRecord record = voiceRecordRepository.findById(recordId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RECORD_NOT_FOUND));
@@ -35,6 +35,8 @@ public class SummaryService {
         if(record.getUser() == null || !record.getUser().getId().equals(userId)){
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
+
+        String content = record.getContent();
 
         // AI 서버 호출
         String summaryText = requestSummaryToAi(recordId, content);
