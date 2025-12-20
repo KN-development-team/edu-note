@@ -1,7 +1,6 @@
 # // request body
 #
 # {
-#   "record_id": 5,
 #   "content": "어제 회의에서는 신규 기능 출시 일정을 논의했습니다..."
 # }
 
