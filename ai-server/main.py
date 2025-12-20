@@ -38,6 +38,9 @@ import shutil
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from openai import OpenAI
 from dotenv import load_dotenv
+#퀴즈 생성
+#Pydantic 모델 추가
+from pydantic import BaseModel
 # 환경 변수 로드 (.env 파일 읽기)
 load_dotenv()
 
@@ -94,4 +97,53 @@ async def speech_to_text(file: UploadFile = File(...)):
         # 에러 발생 시 임시 파일 지우고 에러 메시지
 #         if os.path.exists(temp_filename):
 #             os.remove(temp_filename)
+        raise HTTPException(status_code=500, detail=str(e))
+
+#퀴즈 생성
+# main.py 상단에 Pydantic 모델 추가
+from pydantic import BaseModel
+
+class QuizRequest(BaseModel):
+    text: str       # 요약된 텍스트 (또는 STT 원본)
+    type: str       # MULTIPLE_CHOICE(객관식), SHORT_ANSWER(주관식/단답), ESSAY(서술형)
+    difficulty: str # EASY, MEDIUM, HARD
+
+# ... (기존 코드들) ...
+
+# 3. 퀴즈 생성 기능 (새로 추가!)
+@app.post("/quiz")
+async def generate_quiz(request: QuizRequest):
+    # GPT에게 보낼 프롬프트(명령어) 만들기
+    prompt = f"""
+    아래 텍스트를 바탕으로 {request.difficulty} 난이도의 {request.type} 문제 3개를 만들어줘.
+    결과는 반드시 JSON 형식으로만 출력해야 해. 불필요한 말(예: "여기 있습니다")은 하지 마.
+
+    [출력 형식 예시]
+    [
+      {{
+        "question": "문제 내용",
+        "options": ["보기1", "보기2", "보기3", "보기4"], (객관식일 때만 포함, 아니면 빈 리스트 [])
+        "answer": "정답",
+        "explanation": "해설"
+      }}
+    ]
+
+    [텍스트 내용]
+    {request.text}
+    """
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo", # 또는 gpt-4
+            messages=[
+                {"role": "system", "content": "너는 선생님이야. 주어진 텍스트를 보고 학생들을 위한 퀴즈를 만들어야 해."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7 # 창의성 조절
+        )
+
+        # GPT가 준 응답(JSON 문자열) 꺼내기
+        return {"quiz": response.choices[0].message.content}
+
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
