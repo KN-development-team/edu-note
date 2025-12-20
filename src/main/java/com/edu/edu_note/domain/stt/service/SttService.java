@@ -49,7 +49,7 @@ public class SttService {
         // AI 서버의 /stt 엔드포인트 호출
         String resultText = webClient.post()
                 .uri("/stt")
-//                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
                 .retrieve()
                 .bodyToMono(String.class) // 결과를 String(JSON)으로 받음

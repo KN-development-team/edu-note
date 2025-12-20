@@ -48,13 +48,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1. CSRF 보안 끄기 (POST 요청을 보낼 때 필요)
-                .csrf(AbstractHttpConfigurer::disable)
-
-                // 2. 모든 요청 허용 (로그인 없이도 접속 가능하게)
+                .csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화 (테스트용)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**").permitAll() // 모든 주소 허용
-                        .anyRequest().authenticated()
+                        .requestMatchers("/**").permitAll() // 모든 요청 허용
                 );
 
         return http.build();
