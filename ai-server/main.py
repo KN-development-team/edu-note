@@ -65,12 +65,20 @@ async def speech_to_text(file: UploadFile = File(...)):
         # 1. 받은 파일을 잠시 서버에 저장 (OpenAI에 보내기 위해)
         with open(temp_filename, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
+        # ▼▼▼▼ [추가할 코드] 파일이 진짜 잘 도착했는지 크기 확인 ▼▼▼▼
+        file_size = os.path.getsize(temp_filename)
+        print(f" [디버깅] 저장된 파일 크기: {file_size} bytes")
+
+        if file_size == 0:
+           raise Exception("파일 크기가 0입니다! 전송 실패!")
 
         # 2. OpenAI Whisper API 호출
         with open(temp_filename, "rb") as audio_file:
             transcript = client.audio.transcriptions.create(
                 model="whisper-1",
-                file=audio_file,
+#                 file=audio_file,
+                # 파일 객체 대신 (파일명, 파일객체, 미디어타입) 튜플로 명시적으로 전달
+                file=(temp_filename, audio_file, "audio/mpeg"),
                 language="ko" # 한국어 지정
             )
 
@@ -79,7 +87,11 @@ async def speech_to_text(file: UploadFile = File(...)):
         return {"text": transcript.text}
 
     except Exception as e:
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print(f"에러 내용: {e}")
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
         # 에러 발생 시 임시 파일 지우고 에러 메시지
-        if os.path.exists(temp_filename):
-            os.remove(temp_filename)
+#         if os.path.exists(temp_filename):
+#             os.remove(temp_filename)
         raise HTTPException(status_code=500, detail=str(e))
