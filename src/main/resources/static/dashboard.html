@@ -1,18 +1,10 @@
-﻿<!--<!DOCTYPE html>-->
-<!--<html lang="ko">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <title>EduNote - 대시보드</title>-->
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EduNote - 대시보드</title>
     <style>
-        /* [기본 스타일은 index.html과 통일] */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
@@ -20,7 +12,6 @@
             min-height: 100vh;
         }
 
-        /* 네비게이션 */
         .navbar {
             background: white;
             padding: 16px 40px;
@@ -39,14 +30,12 @@
             font-weight: 600;
         }
 
-        /* 메인 컨테이너 */
         .container {
             max-width: 1000px;
             margin: 40px auto;
             padding: 0 20px;
         }
 
-        /* 섹션 카드 스타일 */
         .card {
             background: white;
             border-radius: 12px;
@@ -56,7 +45,6 @@
         }
         .card h2 { margin-bottom: 20px; font-size: 20px; color: #1f2937; }
 
-        /* 파일 업로드 영역 */
         .upload-area {
             border: 2px dashed #e5e7eb;
             border-radius: 8px;
@@ -77,10 +65,9 @@
             border-radius: 6px;
             font-weight: 600;
             cursor: pointer;
-            display: none; /* 파일 선택 전엔 숨김 */
+            display: none;
         }
 
-        /* 기록 리스트 스타일 */
         .record-list { display: flex; flex-direction: column; gap: 15px; }
         .record-item {
             display: flex;
@@ -117,7 +104,6 @@
             cursor: pointer;
         }
 
-        /* 모달 (퀴즈 옵션) */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5);
@@ -142,7 +128,6 @@
         .btn-cancel { padding: 10px 20px; background: #f3f4f6; border: none; border-radius: 6px; cursor: pointer; }
         .btn-confirm { padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; }
 
-        /* 로딩 UI */
         .loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255,255,255,0.8);
@@ -185,8 +170,7 @@
 
     <div class="card">
         <h2>내 학습 기록</h2>
-        <div class="record-list" id="recordList">
-        </div>
+        <div class="record-list" id="recordList"></div>
     </div>
 </div>
 
@@ -224,28 +208,23 @@
     <div class="spinner"></div>
     <p style="margin-top: 15px; font-weight: 600; color: #374151;">AI가 열심히 작업 중입니다...</p>
 </div>
-
 <script>
-    // === 1. 초기화 및 인증 체크 ===
     const token = localStorage.getItem('token');
     const userName = localStorage.getItem('userName');
 
-    // 토큰 없으면 로그인 페이지로 쫓아냄
     if (!token) {
         alert('로그인이 필요합니다.');
         window.location.href = '/index.html';
     }
 
-    document.getElementById('userNameDisplay').textContent = userName + '님';
+    document.getElementById('userNameDisplay').textContent = (userName || '사용자') + '님';
 
-    // 페이지 로드 시 기록 가져오기 (구현 예정)
-    window.addEventListener('load', () => {
-         loadRecords(); // 이 함수는 백엔드에 GET /api/v1/records 같은게 있어야 작동함
-    });
-
-
-    // === 2. 파일 업로드 관련 ===
+    const recordCache = new Map();
     let selectedFile = null;
+
+    window.addEventListener('load', () => {
+        loadRecords(); // 새로고침 시 DB에서 다시 불러옴
+    });
 
     function handleFileSelect(input) {
         if (input.files && input.files[0]) {
@@ -253,6 +232,13 @@
             document.getElementById('uploadText').textContent = "선택된 파일: " + selectedFile.name;
             document.getElementById('uploadBtn').style.display = 'inline-block';
         }
+    }
+
+    async function readJsonSafe(response) {
+        const ct = response.headers.get('content-type') || '';
+        if (ct.includes('application/json')) return await response.json();
+        const text = await response.text();
+        return { message: text };
     }
 
     async function uploadFile() {
@@ -264,36 +250,34 @@
         showLoading(true);
 
         try {
-            // 백엔드 STT 업로드 API 호출
             const response = await fetch('/api/v1/stt', {
                 method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                    // 주의: FormData 전송 시 Content-Type 헤더는 자동으로 설정되게 둬야 함
-                },
+                headers: { 'Authorization': 'Bearer ' + token },
                 body: formData
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                alert('변환이 완료되었습니다!');
+            const api = await readJsonSafe(response);
 
-                // 변환된 결과를 화면에 바로 추가 (리로드 없이)
-                addRecordToUI({
-                    id: data.id || Date.now(), // ID가 온다고 가정
-                    fileName: selectedFile.name,
-                    date: new Date().toLocaleDateString(),
-                    text: data.text // 변환된 텍스트
-                });
-
-                // 초기화
-                document.getElementById('uploadText').textContent = "여기를 클릭하여 MP3 파일을 선택하세요";
-                document.getElementById('uploadBtn').style.display = 'none';
-                selectedFile = null;
-
-            } else {
-                alert('업로드 실패: ' + response.statusText);
+            if (!response.ok) {
+                alert('업로드 실패: ' + (api.message || response.statusText));
+                return;
             }
+
+            // ApiResponse 랩핑 구조: api.data.id / api.data.text
+            const result = api.data;
+            alert('변환이 완료되었습니다!');
+
+            addRecordToUI({
+                id: result.id,
+                fileName: selectedFile.name,
+                createdAt: Date.now(),
+                text: result.text
+            });
+
+            document.getElementById('uploadText').textContent = "여기를 클릭하여 MP3 파일을 선택하세요";
+            document.getElementById('uploadBtn').style.display = 'none';
+            selectedFile = null;
+
         } catch (error) {
             console.error('Error:', error);
             alert('오류 발생: ' + error.message);
@@ -302,37 +286,81 @@
         }
     }
 
-
-    // === 3. 기록 목록 UI 관리 ===
-    // 실제로는 서버에서 데이터를 받아와야 하지만, 지금은 업로드 성공 시 UI에 추가하는 방식
     function addRecordToUI(record) {
         const list = document.getElementById('recordList');
+        recordCache.set(record.id, record);
+
+        const dateText = record.createdAt
+            ? new Date(record.createdAt).toLocaleDateString('ko-KR')
+            : new Date().toLocaleDateString('ko-KR');
 
         const itemHTML = `
-            <div class="record-item">
+            <div class="record-item" id="record-${record.id}">
                 <div class="record-info">
-                    <h3>📄 ${record.fileName}</h3>
-                    <p>업로드 날짜: ${record.date}</p>
+                    <h3>📄 ${escapeHtml(record.fileName)}</h3>
+                    <p>업로드 날짜: ${escapeHtml(dateText)}</p>
                 </div>
                 <div class="action-buttons">
-                    <button class="btn-view" onclick="alert('변환 내용:\\n' + '${record.text || '내용 없음'}')">내용 보기</button>
+                    <button class="btn-view" onclick="viewContent(${record.id})">내용 보기</button>
                     <button class="btn-quiz" onclick="openQuizModal(${record.id})">퀴즈 생성</button>
                 </div>
             </div>
         `;
 
-        // 최신순으로 맨 위에 추가
         list.insertAdjacentHTML('afterbegin', itemHTML);
     }
 
-    // (가상 함수) 서버에 저장된 리스트 불러오기
-    async function loadRecords() {
-        // 만약 백엔드에 GET /api/v1/records 같은 API가 있다면 여기서 호출
-        // 지금은 비워둡니다.
+    function viewContent(recordId) {
+        const rec = recordCache.get(recordId);
+        const text = rec?.text?.trim() ? rec.text : '내용 없음';
+        alert('변환 내용:\n' + text);
     }
 
+    // 새로고침해도 DB에서 목록을 다시 가져와서 그리기
+    async function loadRecords() {
+        try {
+            const response = await fetch('/api/v1/stt/records', {
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
 
-    // === 4. 퀴즈 생성 로직 ===
+            const api = await readJsonSafe(response);
+
+            if (!response.ok) {
+                alert('기록 불러오기 실패: ' + (api.message || response.statusText));
+                return;
+            }
+
+            const records = api.data || [];
+
+            // 화면/캐시 초기화 후 다시 렌더
+            document.getElementById('recordList').innerHTML = '';
+            recordCache.clear();
+
+            records.forEach(r => {
+                addRecordToUI({
+                    id: r.id,
+                    fileName: r.fileName,
+                    createdAt: r.createdAt,
+                    text: r.text
+                });
+            });
+
+        } catch (e) {
+            console.error(e);
+            alert('기록 불러오기 중 오류: ' + e.message);
+        }
+    }
+
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
     function openQuizModal(recordId) {
         document.getElementById('selectedRecordId').value = recordId;
         document.getElementById('quizModal').style.display = 'flex';
@@ -351,42 +379,33 @@
         showLoading(true);
 
         try {
-            // 퀴즈 생성 API 호출 (Entity 구조에 맞게 요청)
-            // 가정: POST /api/v1/quiz/generate
             const response = await fetch('/api/v1/quiz/generate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + token
                 },
-                body: JSON.stringify({
-                    recordId: recordId,  // Entity의 voiceRecord 매핑용
-                    type: type,          // Entity의 type
-                    difficulty: difficulty // Entity의 level(difficulty)
-                })
+                body: JSON.stringify({ recordId, type, difficulty })
             });
 
-            if (response.ok) {
-                const quizData = await response.json();
+            const api = await readJsonSafe(response);
 
-                // 퀴즈 생성 성공 결과 보여주기
-                console.log(quizData); // 디버깅용
-                alert('퀴즈가 생성되었습니다!\n\n[문제]\n' + quizData.content);
-
-            } else {
-                const err = await response.json();
-                alert('퀴즈 생성 실패: ' + (err.message || '알 수 없는 오류'));
+            if (!response.ok) {
+                alert('퀴즈 생성 실패: ' + (api.message || response.statusText));
+                return;
             }
+
+            const quizData = api.data ?? api;
+            alert('퀴즈가 생성되었습니다!\n\n[문제]\n' + (quizData.content || '문제 내용 없음'));
 
         } catch (error) {
             console.error(error);
-            alert('통신 오류 발생');
+            alert('통신 오류 발생: ' + error.message);
         } finally {
             showLoading(false);
         }
     }
 
-    // === 5. 공통 유틸 ===
     function logout() {
         localStorage.removeItem('token');
         localStorage.removeItem('userId');
@@ -397,7 +416,7 @@
     function showLoading(isShow) {
         document.getElementById('loadingOverlay').style.display = isShow ? 'flex' : 'none';
     }
-
 </script>
+
 </body>
 </html>
