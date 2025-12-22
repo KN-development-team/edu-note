@@ -4,6 +4,7 @@ import com.edu.edu_note.domain.summary.dto.SummaryResponse;
 import com.edu.edu_note.domain.summary.service.SummaryService;
 import com.edu.edu_note.global.auth.CustomUserDetails;
 import com.edu.edu_note.global.response.ApiResponse;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,5 +36,18 @@ public class SummaryController {
                         ));
     }
 
+    // 요약 정보 조회
+    @GetMapping("/{recordId}/summary")
+    public ResponseEntity<ApiResponse<SummaryResponse>> summaryInfo(
+            @PathVariable Long recordId
+    ) {
+        SummaryResponse summaryResponse = summaryService.summaryInfo(recordId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "음성 기록의 요약 정보가 조회되었습니다.",
+                        summaryResponse
+                ));
+    }
 
 }

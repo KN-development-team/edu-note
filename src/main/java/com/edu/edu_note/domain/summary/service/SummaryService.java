@@ -93,4 +93,21 @@ public class SummaryService {
             throw new BusinessException(ErrorCode.AI_SUMMARY_FAILED);
         }
     }
+
+    // 음성 기록 요약 정보 조회
+    public SummaryResponse summaryInfo(Long recordId) {
+        // 요약 정보 불러오기
+        Summary summary = summaryRepository.findByRecord_Id(recordId)
+                .orElseThrow(() -> {
+                    throw new BusinessException(ErrorCode.SUMMARY_NOT_FOUND);
+                });
+
+        // 불러온 값을 dto 변환 후 반환
+        return SummaryResponse.of(
+                summary.getRecord().getId(),
+                summary.getId(),
+                summary.getContent()
+        );
+    }
+
 }
