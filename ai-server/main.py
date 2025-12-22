@@ -1,29 +1,3 @@
-# # ai-server/main.py
-# from fastapi import FastAPI, UploadFile, File
-# from pydantic import BaseModel
-# import os
-# from openai import OpenAI
-#
-# # 환경변수에서 키 가져오기 (Docker가 주입해줌)
-# api_key = os.environ.get("OPENAI_API_KEY")
-# client = OpenAI(api_key=api_key)
-#
-# app = FastAPI()
-#
-# class TextRequest(BaseModel):
-#     text: str
-#
-# @app.get("/")
-# def read_root():
-#     return {"message": "AI Server is running!"}
-#
-# # 1. STT (녹음 -> 텍스트)
-# @app.post("/stt")
-# async def speech_to_text(file: UploadFile = File(...)):
-#     # 실제 오디오 파일을 받아서 처리하는 로직
-#     # (임시로 파일명만 반환)
-#     return {"filename": file.filename, "text": "변환된 텍스트입니다."}
-#
 # # 2. 요약 기능
 # @app.post("/summary")
 # async def summarize_text(request: TextRequest):
@@ -41,6 +15,7 @@ from dotenv import load_dotenv
 #퀴즈 생성
 #Pydantic 모델 추가
 from pydantic import BaseModel
+import google.generativeai as genai
 # 환경 변수 로드 (.env 파일 읽기)
 load_dotenv()
 
@@ -48,7 +23,16 @@ load_dotenv()
 api_key = os.environ.get("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
 
+# Gemini API 설정 추가 ▼▼▼
+google_api_key = os.environ.get("GOOGLE_API_KEY")
+genai.configure(api_key=google_api_key)
+# 퀴즈 생성용 Gemini 모델
+gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+
 app = FastAPI()
+
+print("[AI] LOADED FILE:", __file__)
+
 
 # summary.py의 라우터를 summary_router로 등록
 from summary import router as summary_router
@@ -108,21 +92,58 @@ class QuizRequest(BaseModel):
     type: str       # MULTIPLE_CHOICE(객관식), SHORT_ANSWER(주관식/단답), ESSAY(서술형)
     difficulty: str # EASY, MEDIUM, HARD
 
-# ... (기존 코드들) ...
-
-# 3. 퀴즈 생성 기능 (새로 추가!)
+# 3. 퀴즈 생성 기능
+# @app.post("/quiz")
+# async def generate_quiz(request: QuizRequest):
+#     # GPT에게 보낼 프롬프트(명령어) 만들기
+#     prompt = f"""
+#     아래 텍스트를 바탕으로 {request.difficulty} 난이도의 {request.type} 문제 3개를 만들어줘.
+#     결과는 반드시 JSON 형식으로만 출력해야 해. 불필요한 말(예: "여기 있습니다")은 하지 마.
+#
+#     [출력 형식 예시]
+#     [
+#       {{
+#         "question": "문제 내용",
+#         "options": ["보기1", "보기2", "보기3", "보기4"], (객관식일 때만 포함, 아니면 빈 리스트 [])
+#         "answer": "정답",
+#         "explanation": "해설"
+#       }}
+#     ]
+#
+#     [텍스트 내용]
+#     {request.text}
+#     """
+#
+#     try:
+#         response = client.chat.completions.create(
+#             model="gpt-3.5-turbo", # 또는 gpt-4
+#             messages=[
+#                 {"role": "system", "content": "너는 선생님이야. 주어진 텍스트를 보고 학생들을 위한 퀴즈를 만들어야 해."},
+#                 {"role": "user", "content": prompt}
+#             ],
+#             temperature=0.7 # 창의성 조절
+#         )
+#
+#         # GPT가 준 응답(JSON 문자열) 꺼내기
+#         return {"quiz": response.choices[0].message.content}
+#
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
 @app.post("/quiz")
 async def generate_quiz(request: QuizRequest):
-    # GPT에게 보낼 프롬프트(명령어) 만들기
+    # Gemini에게 보낼 프롬프트 (내용은 동일)
     prompt = f"""
     아래 텍스트를 바탕으로 {request.difficulty} 난이도의 {request.type} 문제 3개를 만들어줘.
-    결과는 반드시 JSON 형식으로만 출력해야 해. 불필요한 말(예: "여기 있습니다")은 하지 마.
+
+    [중요 조건]
+    1. 결과는 반드시 JSON 형식으로만 출력해야 해.
+    2. 불필요한 마크다운 기호(예: ```json)나 잡담은 포함하지 마.
 
     [출력 형식 예시]
     [
       {{
         "question": "문제 내용",
-        "options": ["보기1", "보기2", "보기3", "보기4"], (객관식일 때만 포함, 아니면 빈 리스트 [])
+        "options": ["보기1", "보기2", "보기3", "보기4"],
         "answer": "정답",
         "explanation": "해설"
       }}
@@ -133,17 +154,15 @@ async def generate_quiz(request: QuizRequest):
     """
 
     try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo", # 또는 gpt-4
-            messages=[
-                {"role": "system", "content": "너는 선생님이야. 주어진 텍스트를 보고 학생들을 위한 퀴즈를 만들어야 해."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7 # 창의성 조절
-        )
+        # OpenAI 코드 삭제하고 Gemini 호출로 변경
+        response = gemini_model.generate_content(prompt)
 
-        # GPT가 준 응답(JSON 문자열) 꺼내기
-        return {"quiz": response.choices[0].message.content}
+        # Gemini가 가끔 ```json ... ``` 같은 마크다운을 붙여서 줄 때가 있어서 제거해줌
+        cleaned_text = response.text.replace("```json", "").replace("```", "").strip()
+
+        return {"quiz": cleaned_text}
 
     except Exception as e:
+        print(f"퀴즈 생성 에러: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
