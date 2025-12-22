@@ -10,4 +10,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 이메일 중복 가입 방지를 위한 조회 메서드
     // SELECT COUNT(*) > 0 FROM users WHERE email = ?
     boolean existsByEmail(String email);
-    Optional<User> findByEmail(String email);}
+
+    Optional<User> findByEmail(String email);
+}

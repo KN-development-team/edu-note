@@ -20,6 +20,7 @@ public enum ErrorCode {
     // 404 NOT_FOUND
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "NotFound", "해당 회원을 찾을 수 없습니다."),
     RECORD_NOT_FOUND(HttpStatus.NOT_FOUND, "NotFound", "해당 녹음 기록을 찾을 수 없습니다."),
+    SUMMARY_NOT_FOUND(HttpStatus.NOT_FOUND, "NotFound", "요약 정보를 찾을 수 없습니다."),
 
     // 409 CONFLICT : 리소스 충돌 (중복 데이터 등)
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "Conflict", "이미 존재하는 이메일입니다."),
