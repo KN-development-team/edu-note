@@ -208,9 +208,7 @@
     <div class="spinner"></div>
     <p style="margin-top: 15px; font-weight: 600; color: #374151;">AI가 열심히 작업 중입니다...</p>
 </div>
-
 <script>
-    // === 1. 초기화 및 인증 체크 ===
     const token = localStorage.getItem('token');
     const userName = localStorage.getItem('userName');
 
@@ -221,24 +219,12 @@
 
     document.getElementById('userNameDisplay').textContent = (userName || '사용자') + '님';
 
-    // record 캐시 (텍스트를 안전하게 보관)
     const recordCache = new Map();
+    let selectedFile = null;
 
     window.addEventListener('load', () => {
-        loadRecords();
+        loadRecords(); // 새로고침 시 DB에서 다시 불러옴
     });
-
-    // === 공통: JSON 안전 파서 ===
-    async function readJsonSafe(response) {
-        const ct = response.headers.get('content-type') || '';
-        if (ct.includes('application/json')) return await response.json();
-        // 404 같은 경우 html/text가 올 수 있음
-        const text = await response.text();
-        return { message: text };
-    }
-
-    // === 2. 파일 업로드 관련 ===
-    let selectedFile = null;
 
     function handleFileSelect(input) {
         if (input.files && input.files[0]) {
@@ -246,6 +232,13 @@
             document.getElementById('uploadText').textContent = "선택된 파일: " + selectedFile.name;
             document.getElementById('uploadBtn').style.display = 'inline-block';
         }
+    }
+
+    async function readJsonSafe(response) {
+        const ct = response.headers.get('content-type') || '';
+        if (ct.includes('application/json')) return await response.json();
+        const text = await response.text();
+        return { message: text };
     }
 
     async function uploadFile() {
@@ -259,9 +252,7 @@
         try {
             const response = await fetch('/api/v1/stt', {
                 method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
+                headers: { 'Authorization': 'Bearer ' + token },
                 body: formData
             });
 
@@ -272,25 +263,17 @@
                 return;
             }
 
-            // ✅ 핵심 수정: ApiResponse 랩핑 구조 처리
-            // api = { statusCode, message, data: { id, text } }
+            // ApiResponse 랩핑 구조: api.data.id / api.data.text
             const result = api.data;
-
-            if (!result) {
-                alert('STT 응답 형식 오류: data가 없습니다.\n(백엔드 ApiResponse 구조 확인)');
-                return;
-            }
-
             alert('변환이 완료되었습니다!');
 
             addRecordToUI({
                 id: result.id,
                 fileName: selectedFile.name,
-                date: new Date().toLocaleDateString(),
+                createdAt: Date.now(),
                 text: result.text
             });
 
-            // 초기화
             document.getElementById('uploadText').textContent = "여기를 클릭하여 MP3 파일을 선택하세요";
             document.getElementById('uploadBtn').style.display = 'none';
             selectedFile = null;
@@ -303,18 +286,19 @@
         }
     }
 
-    // === 3. 기록 목록 UI 관리 ===
     function addRecordToUI(record) {
         const list = document.getElementById('recordList');
-
-        // 캐시에 저장 (onclick에서 문자열 삽입 안 하고 안전하게 보기)
         recordCache.set(record.id, record);
+
+        const dateText = record.createdAt
+            ? new Date(record.createdAt).toLocaleDateString('ko-KR')
+            : new Date().toLocaleDateString('ko-KR');
 
         const itemHTML = `
             <div class="record-item" id="record-${record.id}">
                 <div class="record-info">
                     <h3>📄 ${escapeHtml(record.fileName)}</h3>
-                    <p>업로드 날짜: ${escapeHtml(record.date)}</p>
+                    <p>업로드 날짜: ${escapeHtml(dateText)}</p>
                 </div>
                 <div class="action-buttons">
                     <button class="btn-view" onclick="viewContent(${record.id})">내용 보기</button>
@@ -332,6 +316,42 @@
         alert('변환 내용:\n' + text);
     }
 
+    // 새로고침해도 DB에서 목록을 다시 가져와서 그리기
+    async function loadRecords() {
+        try {
+            const response = await fetch('/api/v1/stt/records', {
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            const api = await readJsonSafe(response);
+
+            if (!response.ok) {
+                alert('기록 불러오기 실패: ' + (api.message || response.statusText));
+                return;
+            }
+
+            const records = api.data || [];
+
+            // 화면/캐시 초기화 후 다시 렌더
+            document.getElementById('recordList').innerHTML = '';
+            recordCache.clear();
+
+            records.forEach(r => {
+                addRecordToUI({
+                    id: r.id,
+                    fileName: r.fileName,
+                    createdAt: r.createdAt,
+                    text: r.text
+                });
+            });
+
+        } catch (e) {
+            console.error(e);
+            alert('기록 불러오기 중 오류: ' + e.message);
+        }
+    }
+
     function escapeHtml(str) {
         return String(str ?? '')
             .replaceAll('&', '&amp;')
@@ -341,13 +361,6 @@
             .replaceAll("'", '&#039;');
     }
 
-    // (현재는 비어있음) 서버 저장 기록 불러오기
-    async function loadRecords() {
-        // TODO: 백엔드에 "내 기록 목록" GET API가 생기면 여기서 호출해서 recordList를 채우면 됩니다.
-        // 지금 STT 화면 문제(내용 없음)는 uploadFile 응답 파싱 문제였고, 위 수정으로 해결됩니다.
-    }
-
-    // === 4. 퀴즈 생성 로직 ===
     function openQuizModal(recordId) {
         document.getElementById('selectedRecordId').value = recordId;
         document.getElementById('quizModal').style.display = 'flex';
@@ -372,11 +385,7 @@
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + token
                 },
-                body: JSON.stringify({
-                    recordId: recordId,
-                    type: type,
-                    difficulty: difficulty
-                })
+                body: JSON.stringify({ recordId, type, difficulty })
             });
 
             const api = await readJsonSafe(response);
@@ -386,10 +395,7 @@
                 return;
             }
 
-            // ✅ ApiResponse 랩핑이면 여기서도 data로 꺼내야 함
             const quizData = api.data ?? api;
-
-            console.log('quizData:', quizData);
             alert('퀴즈가 생성되었습니다!\n\n[문제]\n' + (quizData.content || '문제 내용 없음'));
 
         } catch (error) {
@@ -400,7 +406,6 @@
         }
     }
 
-    // === 5. 공통 유틸 ===
     function logout() {
         localStorage.removeItem('token');
         localStorage.removeItem('userId');
@@ -412,5 +417,6 @@
         document.getElementById('loadingOverlay').style.display = isShow ? 'flex' : 'none';
     }
 </script>
+
 </body>
 </html>
