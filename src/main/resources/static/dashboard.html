@@ -1,6 +1,403 @@
-﻿<!DOCTYPE html>
+﻿<!--<!DOCTYPE html>-->
+<!--<html lang="ko">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>EduNote - 대시보드</title>-->
+
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EduNote - 대시보드</title>
+    <style>
+        /* [기본 스타일은 index.html과 통일] */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f3f4f6;
+            min-height: 100vh;
+        }
+
+        /* 네비게이션 */
+        .navbar {
+            background: white;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .navbar-brand { font-size: 20px; font-weight: 700; color: #1f2937; }
+        .user-info { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+        .btn-logout {
+            color: #dc2626;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* 메인 컨테이너 */
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* 섹션 카드 스타일 */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        .card h2 { margin-bottom: 20px; font-size: 20px; color: #1f2937; }
+
+        /* 파일 업로드 영역 */
+        .upload-area {
+            border: 2px dashed #e5e7eb;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .upload-area:hover { border-color: #2563eb; background: #f8fafc; }
+        .upload-icon { font-size: 40px; color: #9ca3af; margin-bottom: 10px; }
+        .file-input { display: none; }
+        .btn-upload {
+            margin-top: 15px;
+            padding: 10px 24px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: none; /* 파일 선택 전엔 숨김 */
+        }
+
+        /* 기록 리스트 스타일 */
+        .record-list { display: flex; flex-direction: column; gap: 15px; }
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+        .record-item:hover { border-color: #2563eb; }
+        .record-info h3 { font-size: 16px; margin-bottom: 4px; }
+        .record-info p { font-size: 13px; color: #6b7280; }
+
+        .action-buttons { display: flex; gap: 8px; }
+        .btn-quiz {
+            padding: 8px 16px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-view {
+            padding: 8px 16px;
+            background: #f3f4f6;
+            color: #374151;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 모달 (퀴즈 옵션) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 400px;
+            max-width: 90%;
+        }
+        .modal-header { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 600; }
+        .form-group select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #d1d5db; }
+
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-cancel { padding: 10px 20px; background: #f3f4f6; border: none; border-radius: 6px; cursor: pointer; }
+        .btn-confirm { padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; }
+
+        /* 로딩 UI */
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 2000;
+        }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid #e5e7eb; border-top: 4px solid #2563eb;
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="navbar-brand">EduNote Dashboard</div>
+    <div class="user-info">
+        <span id="userNameDisplay">사용자님</span>
+        <button class="btn-logout" onclick="logout()">로그아웃</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>새로운 강의 녹음 업로드</h2>
+        <div class="upload-area" onclick="document.getElementById('voiceFile').click()">
+            <div class="upload-icon">🎙️</div>
+            <p id="uploadText">여기를 클릭하여 MP3 파일을 선택하세요</p>
+            <input type="file" id="voiceFile" class="file-input" accept="audio/*" onchange="handleFileSelect(this)">
+        </div>
+        <div style="text-align: center;">
+            <button class="btn-upload" id="uploadBtn" onclick="uploadFile()">변환 시작하기</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>내 학습 기록</h2>
+        <div class="record-list" id="recordList">
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="quizModal">
+    <div class="modal">
+        <div class="modal-header">퀴즈 생성 옵션</div>
+        <input type="hidden" id="selectedRecordId">
+
+        <div class="form-group">
+            <label>퀴즈 유형 (Type)</label>
+            <select id="quizType">
+                <option value="MULTIPLE_CHOICE">객관식 (4지선다)</option>
+                <option value="OX">OX 퀴즈</option>
+                <option value="SHORT_ANSWER">단답형</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>난이도 (Difficulty)</label>
+            <select id="quizDifficulty">
+                <option value="EASY">쉬움 (Easy)</option>
+                <option value="NORMAL" selected>보통 (Normal)</option>
+                <option value="HARD">어려움 (Hard)</option>
+            </select>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal()">취소</button>
+            <button class="btn-confirm" onclick="generateQuiz()">퀴즈 생성</button>
+        </div>
+    </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p style="margin-top: 15px; font-weight: 600; color: #374151;">AI가 열심히 작업 중입니다...</p>
+</div>
+
+<script>
+    // === 1. 초기화 및 인증 체크 ===
+    const token = localStorage.getItem('token');
+    const userName = localStorage.getItem('userName');
+
+    // 토큰 없으면 로그인 페이지로 쫓아냄
+    if (!token) {
+        alert('로그인이 필요합니다.');
+        window.location.href = '/index.html';
+    }
+
+    document.getElementById('userNameDisplay').textContent = userName + '님';
+
+    // 페이지 로드 시 기록 가져오기 (구현 예정)
+    window.addEventListener('load', () => {
+         loadRecords(); // 이 함수는 백엔드에 GET /api/v1/records 같은게 있어야 작동함
+    });
+
+
+    // === 2. 파일 업로드 관련 ===
+    let selectedFile = null;
+
+    function handleFileSelect(input) {
+        if (input.files && input.files[0]) {
+            selectedFile = input.files[0];
+            document.getElementById('uploadText').textContent = "선택된 파일: " + selectedFile.name;
+            document.getElementById('uploadBtn').style.display = 'inline-block';
+        }
+    }
+
+    async function uploadFile() {
+        if (!selectedFile) return;
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        showLoading(true);
+
+        try {
+            // 백엔드 STT 업로드 API 호출
+            const response = await fetch('/api/v1/stt', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                    // 주의: FormData 전송 시 Content-Type 헤더는 자동으로 설정되게 둬야 함
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                alert('변환이 완료되었습니다!');
+
+                // 변환된 결과를 화면에 바로 추가 (리로드 없이)
+                addRecordToUI({
+                    id: data.id || Date.now(), // ID가 온다고 가정
+                    fileName: selectedFile.name,
+                    date: new Date().toLocaleDateString(),
+                    text: data.text // 변환된 텍스트
+                });
+
+                // 초기화
+                document.getElementById('uploadText').textContent = "여기를 클릭하여 MP3 파일을 선택하세요";
+                document.getElementById('uploadBtn').style.display = 'none';
+                selectedFile = null;
+
+            } else {
+                alert('업로드 실패: ' + response.statusText);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('오류 발생: ' + error.message);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+
+    // === 3. 기록 목록 UI 관리 ===
+    // 실제로는 서버에서 데이터를 받아와야 하지만, 지금은 업로드 성공 시 UI에 추가하는 방식
+    function addRecordToUI(record) {
+        const list = document.getElementById('recordList');
+
+        const itemHTML = `
+            <div class="record-item">
+                <div class="record-info">
+                    <h3>📄 ${record.fileName}</h3>
+                    <p>업로드 날짜: ${record.date}</p>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn-view" onclick="alert('변환 내용:\\n' + '${record.text || '내용 없음'}')">내용 보기</button>
+                    <button class="btn-quiz" onclick="openQuizModal(${record.id})">퀴즈 생성</button>
+                </div>
+            </div>
+        `;
+
+        // 최신순으로 맨 위에 추가
+        list.insertAdjacentHTML('afterbegin', itemHTML);
+    }
+
+    // (가상 함수) 서버에 저장된 리스트 불러오기
+    async function loadRecords() {
+        // 만약 백엔드에 GET /api/v1/records 같은 API가 있다면 여기서 호출
+        // 지금은 비워둡니다.
+    }
+
+
+    // === 4. 퀴즈 생성 로직 ===
+    function openQuizModal(recordId) {
+        document.getElementById('selectedRecordId').value = recordId;
+        document.getElementById('quizModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('quizModal').style.display = 'none';
+    }
+
+    async function generateQuiz() {
+        const recordId = document.getElementById('selectedRecordId').value;
+        const type = document.getElementById('quizType').value;
+        const difficulty = document.getElementById('quizDifficulty').value;
+
+        closeModal();
+        showLoading(true);
+
+        try {
+            // 퀴즈 생성 API 호출 (Entity 구조에 맞게 요청)
+            // 가정: POST /api/v1/quiz/generate
+            const response = await fetch('/api/v1/quiz/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    recordId: recordId,  // Entity의 voiceRecord 매핑용
+                    type: type,          // Entity의 type
+                    difficulty: difficulty // Entity의 level(difficulty)
+                })
+            });
+
+            if (response.ok) {
+                const quizData = await response.json();
+
+                // 퀴즈 생성 성공 결과 보여주기
+                console.log(quizData); // 디버깅용
+                alert('퀴즈가 생성되었습니다!\n\n[문제]\n' + quizData.content);
+
+            } else {
+                const err = await response.json();
+                alert('퀴즈 생성 실패: ' + (err.message || '알 수 없는 오류'));
+            }
+
+        } catch (error) {
+            console.error(error);
+            alert('통신 오류 발생');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // === 5. 공통 유틸 ===
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userName');
+        window.location.href = '/index.html';
+    }
+
+    function showLoading(isShow) {
+        document.getElementById('loadingOverlay').style.display = isShow ? 'flex' : 'none';
+    }
+
+</script>
+</body>
+</html>
