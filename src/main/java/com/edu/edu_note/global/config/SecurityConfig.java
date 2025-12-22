@@ -42,9 +42,10 @@ public class SecurityConfig {
                 // 세션 사용 안 함 (JWT는 Stateless)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // 정적 파일 및 회원가입/로그인은 모두 허용
+                        .requestMatchers("/", "/index.html", "/dashboard.html", "/static/**", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/api/users/signup", "/api/users/login").permitAll()
-                        // STT 요청은 인증된 사용자만!
-                        .requestMatchers("/api/v1/stt/**").authenticated()
+                        // 그 외 모든 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
                 // 필터 추가 (ID/PW 검사 전에 JWT 검사 먼저 하기)

@@ -47,12 +47,20 @@ public class UserService {
         if (!user.getPassword().equals(request.getPassword())) {
             throw new BusinessException(ErrorCode.LOGIN_FAILED);
         }
-
         // 3. 토큰 생성
         String accessToken = jwtTokenProvider.createAccessToken(user.getId(), user.getEmail());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId(), user.getEmail());
 
         // 4. 응답 DTO 만들기
         return LoginResponse.of(user, accessToken, refreshToken);
+    }
+
+    // 사용자 정보 조회
+    public UserSignUpResponse getUserInfo(Long userId) {
+        // userId로 사용자 정보 가져오기
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+        // 가져온 정보로 응답 DTO 변환 후 반환
+        return UserSignUpResponse.from(user);
     }
 }

@@ -5,10 +5,12 @@ import com.edu.edu_note.domain.user.dto.LoginResponse;
 import com.edu.edu_note.domain.user.dto.UserSignUpRequest;
 import com.edu.edu_note.domain.user.dto.UserSignUpResponse;
 import com.edu.edu_note.domain.user.service.UserService;
+import com.edu.edu_note.global.auth.CustomUserDetails;
 import com.edu.edu_note.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -38,5 +40,17 @@ public class UserController {
                 ApiResponse.success("로그인이 완료되었습니다.", response)
         );
     }
+
+    @GetMapping("/info")
+    public ResponseEntity<ApiResponse<UserSignUpResponse>> getUserInfo (
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+        ) {
+            Long userId = customUserDetails.getUser().getId();
+            UserSignUpResponse response = userService.getUserInfo(userId);
+            return ResponseEntity.ok(
+                    ApiResponse.success("사용자 정보가 조회되었습니다.", response)
+            );
+
+        }
 
 }
