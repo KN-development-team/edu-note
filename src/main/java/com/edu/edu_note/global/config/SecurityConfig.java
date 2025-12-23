@@ -64,7 +64,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ 정적 페이지 허용 (quiz.html 추가)
+                        // 정적 페이지 허용
                         .requestMatchers(
                                 "/",
                                 "/index.html",
