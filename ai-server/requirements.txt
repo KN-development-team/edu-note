@@ -4,3 +4,9 @@ openai
 python-multipart
 pydantic
 python-dotenv
+
+google-generativeai # Google Gemini AI 사용 라이브러리
+
+# --- 테스트 도구(Dev) ---
+pytest # 테스트 프레임워크
+httpx # 테스트용 HTTP 클라이언트

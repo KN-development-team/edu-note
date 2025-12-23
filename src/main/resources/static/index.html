@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduNote</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(
+                180deg,
+                #f4f9ff 0%,
+                #eaf3ff 40%,
+                #dfeeff 100%
+            );
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            letter-spacing: -0.3px;
+        }
+
+        .navbar-right {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #2563eb;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: transparent;
+            padding: 100px 40px;
+            text-align: center;
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-content {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .hero-content h1 {
+            font-size: 56px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 24px;
+            line-height: 1.2;
+            letter-spacing: -1px;
+        }
+
+        .hero-content .subtitle {
+            font-size: 18px;
+            color: #6b7280;
+            line-height: 1.7;
+            margin-bottom: 40px;
+            font-weight: 400;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .hero-cta button {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .hero-cta .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .hero-cta .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .hero-cta .btn-secondary {
+            background: white;
+            color: #1f2937;
+            border: 1px solid #d1d5db;
+        }
+
+        .hero-cta .btn-secondary:hover {
+            background: #f9fafb;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 100px 40px;
+            background: transparent;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .features-header h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 16px;
+            letter-spacing: -0.8px;
+        }
+
+        .features-header p {
+            font-size: 18px;
+            color: #6b7280;
+            font-weight: 400;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+
+        .feature-card {
+            padding: 40px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: #2563eb;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.08);
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            font-size: 15px;
+            color: #6b7280;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        .feature-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #2563eb;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        /* Auth Section */
+        .auth-section {
+            padding: 100px 40px;
+            background: transparent;
+        }
+
+        .auth-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .auth-header h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+            letter-spacing: -0.4px;
+        }
+
+        .auth-header p {
+            font-size: 15px;
+            color: #6b7280;
+            font-weight: 400;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1f2937;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        input::placeholder {
+            color: #9ca3af;
+        }
+
+        input:hover, select:hover {
+            border-color: #9ca3af;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.06);
+        }
+
+        select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 36px;
+            appearance: none;
+        }
+
+        .form-toggle {
+            display: flex;
+            margin-bottom: 28px;
+            background: #f3f4f6;
+            border-radius: 6px;
+            padding: 2px;
+            gap: 2px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b7280;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn.active {
+            color: white;
+            background: #2563eb;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+            margin-bottom: 8px;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+
+        .btn-primary:active {
+            background: #1e40af;
+            border-color: #1e40af;
+        }
+
+        .form-section {
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: #ecfdf5;
+            color: #065f46;
+            padding: 12px 14px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+            font-weight: 500;
+            font-size: 14px;
+            border: 1px solid #d1fae5;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #2563eb;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        .loading p {
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 14px 20px;
+            }
+
+            .navbar-brand {
+                font-size: 16px;
+            }
+
+            .navbar-right {
+                gap: 16px;
+                font-size: 13px;
+            }
+
+            .hero-section {
+                padding: 60px 20px;
+                min-height: 400px;
+            }
+
+            .hero-content h1 {
+                font-size: 36px;
+                margin-bottom: 16px;
+            }
+
+            .hero-content .subtitle {
+                font-size: 16px;
+                margin-bottom: 30px;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+            }
+
+            .hero-cta button {
+                width: 100%;
+            }
+
+            .features-section {
+                padding: 60px 20px;
+            }
+
+            .features-header {
+                margin-bottom: 50px;
+            }
+
+            .features-header h2 {
+                font-size: 32px;
+                margin-bottom: 12px;
+            }
+
+            .features-header p {
+                font-size: 16px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .feature-card {
+                padding: 30px;
+            }
+
+            .auth-section {
+                padding: 60px 20px;
+            }
+
+            .auth-container {
+                max-width: 100%;
+            }
+
+            .auth-header h2 {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 12px 16px;
+            }
+
+            .navbar-right {
+                gap: 12px;
+                font-size: 12px;
+            }
+
+            .hero-section {
+                padding: 40px 16px;
+                min-height: 300px;
+            }
+
+            .hero-content h1 {
+                font-size: 28px;
+                margin-bottom: 12px;
+            }
+
+            .hero-content .subtitle {
+                font-size: 14px;
+                margin-bottom: 24px;
+            }
+
+            .features-header h2 {
+                font-size: 24px;
+            }
+
+            .feature-card {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div class="navbar-brand">EduNote</div>
+    <div class="navbar-right">
+        <a href="#" class="nav-link">소개</a>
+        <a href="#" class="nav-link">기능</a>
+        <a href="#" class="nav-link">문의</a>
+    </div>
+</div>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-content">
+        <h1>음성으로 배우는<br>똑똑한 학습</h1>
+        <p class="subtitle">음성을 텍스트로 변환하고 핵심을 요약하는 AI 학습 플랫폼입니다.</p>
+        <div class="hero-cta">
+            <button class="btn-primary" id="ctaButton">지금 시작하기</button>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="features-container">
+        <div class="features-header">
+            <h2>EduNote의 특징</h2>
+            <p>학습 효율을 높이는 세 가지 핵심 기능</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-number">1</div>
+                <h3>음성 인식</h3>
+                <p>수업 중 음성을 자동으로 기록하여 시간을 절약하고 학습에 집중할 수 있습니다.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-number">2</div>
+                <h3>AI 요약</h3>
+                <p>중요한 내용만 자동으로 정리되어 복잡한 강의를 한눈에 파악할 수 있습니다.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-number">3</div>
+                <h3>효율적 학습</h3>
+                <p>체계적인 복습 시스템으로 장기 기억을 형성하고 학습 성과를 극대화합니다.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Auth Section -->
+<section class="auth-section">
+    <div class="auth-container">
+        <div class="auth-header">
+            <h2>시작하기</h2>
+            <p>로그인하거나 회원가입하세요</p>
+        </div>
+
+        <div class="form-container">
+            <div class="form-toggle">
+                <button class="toggle-btn active" id="loginTab" onclick="switchForm('login')">로그인</button>
+                <button class="toggle-btn" id="signupTab" onclick="switchForm('signup')">회원가입</button>
+            </div>
+
+            <!-- 로그인 폼 -->
+            <div class="form-section active" id="loginForm">
+                <div class="success-message" id="loginSuccess"></div>
+                <form id="loginFormElement" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="loginEmail">이메일</label>
+                        <input type="email" id="loginEmail" name="email" placeholder="example@email.com" required>
+                        <div class="error-message" id="loginEmailError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword">비밀번호</label>
+                        <input type="password" id="loginPassword" name="password" placeholder="비밀번호를 입력하세요" required>
+                        <div class="error-message" id="loginPasswordError"></div>
+                    </div>
+
+                    <div class="loading" id="loginLoading">
+                        <div class="spinner"></div>
+                        <p>로그인 중...</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="loginBtn">로그인</button>
+                </form>
+            </div>
+
+            <!-- 회원가입 폼 -->
+            <div class="form-section" id="signupForm">
+                <div class="success-message" id="signupSuccess"></div>
+                <form id="signupFormElement" onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <label for="signupName">이름</label>
+                        <input type="text" id="signupName" name="name" placeholder="홍길동" required>
+                        <div class="error-message" id="signupNameError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupEmail">이메일</label>
+                        <input type="email" id="signupEmail" name="email" placeholder="example@email.com" required>
+                        <div class="error-message" id="signupEmailError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupPassword">비밀번호</label>
+                        <input type="password" id="signupPassword" name="password" placeholder="비밀번호를 입력하세요" required>
+                        <div class="error-message" id="signupPasswordError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupPasswordConfirm">비밀번호 확인</label>
+                        <input type="password" id="signupPasswordConfirm" name="passwordConfirm" placeholder="비밀번호를 다시 입력하세요" required>
+                        <div class="error-message" id="signupPasswordConfirmError"></div>
+                    </div>
+
+                    <div class="loading" id="signupLoading">
+                        <div class="spinner"></div>
+                        <p>회원가입 중...</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="signupBtn">회원가입</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // 폼 전환 함수
+    function switchForm(formType) {
+        const loginTab = document.getElementById('loginTab');
+        const signupTab = document.getElementById('signupTab');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+
+        if (formType === 'login') {
+            loginTab.classList.add('active');
+            signupTab.classList.remove('active');
+            loginForm.classList.add('active');
+            signupForm.classList.remove('active');
+        } else {
+            loginTab.classList.remove('active');
+            signupTab.classList.add('active');
+            loginForm.classList.remove('active');
+            signupForm.classList.add('active');
+        }
+
+        // 폼 전환 시 에러 메시지 초기화
+        clearAllErrors();
+    }
+
+    // 에러 메시지 초기화
+    function clearAllErrors() {
+        document.querySelectorAll('.error-message').forEach(el => {
+            el.classList.remove('show');
+            el.textContent = '';
+        });
+    }
+
+    // 로그인 처리
+    async function handleLogin(event) {
+        event.preventDefault();
+        clearAllErrors();
+
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+
+        // 유효성 검사
+        if (!email) {
+            showError('loginEmailError', '이메일을 입력해주세요');
+            return;
+        }
+        if (!password) {
+            showError('loginPasswordError', '비밀번호를 입력해주세요');
+            return;
+        }
+
+        try {
+            showLoading('loginLoading', true);
+            document.getElementById('loginBtn').disabled = true;
+
+            const response = await fetch('/api/users/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // 토큰 저장
+                localStorage.setItem('token', data.data.access_token);
+                localStorage.setItem('userId', data.data.userId);
+                localStorage.setItem('userName', data.data.name);
+
+                // 성공 메시지
+                const successMsg = document.getElementById('loginSuccess');
+                successMsg.textContent = '로그인 성공! 대시보드로 이동 중...';
+                successMsg.classList.add('show');
+
+                // 대시보드로 이동
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 1500);
+            } else {
+                // 에러 처리
+                if (data.statusCode === 404) {
+                    showError('loginEmailError', '가입되지 않은 이메일입니다');
+                } else if (data.statusCode === 401) {
+                    showError('loginPasswordError', '비밀번호가 일치하지 않습니다');
+                } else {
+                    alert(data.message || '로그인에 실패했습니다');
+                }
+            }
+        } catch (error) {
+            console.error('로그인 오류:', error);
+            alert('로그인 중 오류가 발생했습니다: ' + error.message);
+        } finally {
+            showLoading('loginLoading', false);
+            document.getElementById('loginBtn').disabled = false;
+        }
+    }
+
+    // 회원가입 처리
+  async function handleSignup(event) {
+    event.preventDefault();
+    clearAllErrors();
+
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+
+    let isValid = true;
+    if (!name) { showError('signupNameError', '이름을 입력해주세요'); isValid = false; }
+    if (!email) { showError('signupEmailError', '이메일을 입력해주세요'); isValid = false; }
+    if (!password) { showError('signupPasswordError', '비밀번호를 입력해주세요'); isValid = false; }
+    if (password !== passwordConfirm) { showError('signupPasswordConfirmError', '비밀번호가 일치하지 않습니다'); isValid = false; }
+    if (!isValid) return;
+
+    try {
+      showLoading('signupLoading', true);
+      document.getElementById('signupBtn').disabled = true;
+
+      const response = await fetch('/api/users/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        const successMsg = document.getElementById('signupSuccess');
+        successMsg.textContent = '회원가입 성공! 로그인 페이지로 이동합니다.';
+        successMsg.classList.add('show');
+
+        document.getElementById('signupFormElement').reset();
+
+        setTimeout(() => {
+          switchForm('login');
+          const loginSuccess = document.getElementById('loginSuccess');
+          loginSuccess.textContent = '회원가입이 완료되었습니다. 로그인해주세요.';
+          loginSuccess.classList.add('show');
+        }, 2000);
+      } else {
+        if (data.message && data.message.includes('이메일')) {
+          showError('signupEmailError', data.message);
+        } else {
+          alert(data.message || '회원가입에 실패했습니다');
+        }
+      }
+    } catch (error) {
+      console.error('회원가입 오류:', error);
+      alert('회원가입 중 오류가 발생했습니다: ' + error.message);
+    } finally {
+      showLoading('signupLoading', false);
+      document.getElementById('signupBtn').disabled = false;
+    }
+  }
+
+    // 에러 메시지 표시
+    function showError(elementId, message) {
+        const errorEl = document.getElementById(elementId);
+        errorEl.textContent = message;
+        errorEl.classList.add('show');
+    }
+
+    // 로딩 표시
+    function showLoading(elementId, show) {
+        const loadingEl = document.getElementById(elementId);
+        if (show) {
+            loadingEl.classList.add('show');
+        } else {
+            loadingEl.classList.remove('show');
+        }
+    }
+
+    // 페이지 로드 시 이미 로그인된 경우 대시보드로 이동
+    window.addEventListener('load', () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            window.location.href = '/dashboard.html';
+        }
+
+        // CTA 버튼 클릭 이벤트
+        const ctaButton = document.getElementById('ctaButton');
+        if (ctaButton) {
+            ctaButton.addEventListener('click', () => {
+                const authSection = document.querySelector('.auth-section');
+                if (authSection) {
+                    authSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

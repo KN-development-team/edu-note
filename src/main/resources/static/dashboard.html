@@ -1,0 +1,757 @@
+﻿<!--<!DOCTYPE html>-->
+<!--<html lang="ko">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>EduNote - 대시보드</title>-->
+<!--    <style>-->
+<!--        * { margin: 0; padding: 0; box-sizing: border-box; }-->
+<!--        body {-->
+<!--            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;-->
+<!--            background: #f3f4f6;-->
+<!--            min-height: 100vh;-->
+<!--        }-->
+
+<!--        .navbar {-->
+<!--            background: white;-->
+<!--            padding: 16px 40px;-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            align-items: center;-->
+<!--            box-shadow: 0 1px 3px rgba(0,0,0,0.1);-->
+<!--        }-->
+<!--        .navbar-brand { font-size: 20px; font-weight: 700; color: #1f2937; }-->
+<!--        .user-info { display: flex; align-items: center; gap: 16px; font-size: 14px; }-->
+<!--        .btn-logout {-->
+<!--            color: #dc2626;-->
+<!--            background: none;-->
+<!--            border: none;-->
+<!--            cursor: pointer;-->
+<!--            font-weight: 600;-->
+<!--        }-->
+
+<!--        .container {-->
+<!--            max-width: 1000px;-->
+<!--            margin: 40px auto;-->
+<!--            padding: 0 20px;-->
+<!--        }-->
+
+<!--        .card {-->
+<!--            background: white;-->
+<!--            border-radius: 12px;-->
+<!--            padding: 30px;-->
+<!--            box-shadow: 0 4px 6px rgba(0,0,0,0.05);-->
+<!--            margin-bottom: 30px;-->
+<!--        }-->
+<!--        .card h2 { margin-bottom: 20px; font-size: 20px; color: #1f2937; }-->
+
+<!--        .upload-area {-->
+<!--            border: 2px dashed #e5e7eb;-->
+<!--            border-radius: 8px;-->
+<!--            padding: 40px;-->
+<!--            text-align: center;-->
+<!--            transition: all 0.2s;-->
+<!--            cursor: pointer;-->
+<!--        }-->
+<!--        .upload-area:hover { border-color: #2563eb; background: #f8fafc; }-->
+<!--        .upload-icon { font-size: 40px; color: #9ca3af; margin-bottom: 10px; }-->
+<!--        .file-input { display: none; }-->
+<!--        .btn-upload {-->
+<!--            margin-top: 15px;-->
+<!--            padding: 10px 24px;-->
+<!--            background: #2563eb;-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            border-radius: 6px;-->
+<!--            font-weight: 600;-->
+<!--            cursor: pointer;-->
+<!--            display: none;-->
+<!--        }-->
+
+<!--        .record-list { display: flex; flex-direction: column; gap: 15px; }-->
+<!--        .record-item {-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            align-items: center;-->
+<!--            padding: 20px;-->
+<!--            border: 1px solid #e5e7eb;-->
+<!--            border-radius: 8px;-->
+<!--            transition: 0.2s;-->
+<!--        }-->
+<!--        .record-item:hover { border-color: #2563eb; }-->
+<!--        .record-info h3 { font-size: 16px; margin-bottom: 4px; }-->
+<!--        .record-info p { font-size: 13px; color: #6b7280; }-->
+
+<!--        .action-buttons { display: flex; gap: 8px; }-->
+<!--        .btn-quiz {-->
+<!--            padding: 8px 16px;-->
+<!--            background: #10b981;-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            border-radius: 6px;-->
+<!--            font-size: 13px;-->
+<!--            font-weight: 600;-->
+<!--            cursor: pointer;-->
+<!--        }-->
+<!--        .btn-view {-->
+<!--            padding: 8px 16px;-->
+<!--            background: #f3f4f6;-->
+<!--            color: #374151;-->
+<!--            border: none;-->
+<!--            border-radius: 6px;-->
+<!--            font-size: 13px;-->
+<!--            font-weight: 600;-->
+<!--            cursor: pointer;-->
+<!--        }-->
+
+<!--        .modal-overlay {-->
+<!--            position: fixed; top: 0; left: 0; width: 100%; height: 100%;-->
+<!--            background: rgba(0,0,0,0.5);-->
+<!--            display: none;-->
+<!--            justify-content: center;-->
+<!--            align-items: center;-->
+<!--            z-index: 1000;-->
+<!--        }-->
+<!--        .modal {-->
+<!--            background: white;-->
+<!--            padding: 30px;-->
+<!--            border-radius: 12px;-->
+<!--            width: 400px;-->
+<!--            max-width: 90%;-->
+<!--        }-->
+<!--        .modal-header { font-size: 18px; font-weight: 700; margin-bottom: 20px; }-->
+<!--        .form-group { margin-bottom: 15px; }-->
+<!--        .form-group label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 600; }-->
+<!--        .form-group select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #d1d5db; }-->
+
+<!--        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }-->
+<!--        .btn-cancel { padding: 10px 20px; background: #f3f4f6; border: none; border-radius: 6px; cursor: pointer; }-->
+<!--        .btn-confirm { padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; }-->
+
+<!--        .loading-overlay {-->
+<!--            position: fixed; top: 0; left: 0; width: 100%; height: 100%;-->
+<!--            background: rgba(255,255,255,0.8);-->
+<!--            display: none;-->
+<!--            justify-content: center;-->
+<!--            align-items: center;-->
+<!--            flex-direction: column;-->
+<!--            z-index: 2000;-->
+<!--        }-->
+<!--        .spinner {-->
+<!--            width: 40px; height: 40px;-->
+<!--            border: 4px solid #e5e7eb; border-top: 4px solid #2563eb;-->
+<!--            border-radius: 50%; animation: spin 1s linear infinite;-->
+<!--        }-->
+<!--        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--<div class="navbar">-->
+<!--    <div class="navbar-brand">EduNote Dashboard</div>-->
+<!--    <div class="user-info">-->
+<!--        <span id="userNameDisplay">사용자님</span>-->
+<!--        <button class="btn-logout" onclick="logout()">로그아웃</button>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<div class="container">-->
+<!--    <div class="card">-->
+<!--        <h2>새로운 강의 녹음 업로드</h2>-->
+<!--        <div class="upload-area" onclick="document.getElementById('voiceFile').click()">-->
+<!--            <div class="upload-icon">🎙️</div>-->
+<!--            <p id="uploadText">여기를 클릭하여 MP3 파일을 선택하세요</p>-->
+<!--            <input type="file" id="voiceFile" class="file-input" accept="audio/*" onchange="handleFileSelect(this)">-->
+<!--        </div>-->
+<!--        <div style="text-align: center;">-->
+<!--            <button class="btn-upload" id="uploadBtn" onclick="uploadFile()">변환 시작하기</button>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <div class="card">-->
+<!--        <h2>내 학습 기록</h2>-->
+<!--        <div class="record-list" id="recordList"></div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<div class="modal-overlay" id="quizModal">-->
+<!--    <div class="modal">-->
+<!--        <div class="modal-header">퀴즈 생성 옵션</div>-->
+<!--        <input type="hidden" id="selectedRecordId">-->
+
+<!--        <div class="form-group">-->
+<!--            <label>퀴즈 유형 (Type)</label>-->
+<!--            <select id="quizType">-->
+<!--                <option value="MULTIPLE_CHOICE">객관식 (4지선다)</option>-->
+<!--                <option value="OX">OX 퀴즈</option>-->
+<!--                <option value="SHORT_ANSWER">단답형</option>-->
+<!--            </select>-->
+<!--        </div>-->
+
+<!--        <div class="form-group">-->
+<!--            <label>난이도 (Difficulty)</label>-->
+<!--            <select id="quizDifficulty">-->
+<!--                <option value="EASY">쉬움 (Easy)</option>-->
+<!--                <option value="NORMAL" selected>보통 (Normal)</option>-->
+<!--                <option value="HARD">어려움 (Hard)</option>-->
+<!--            </select>-->
+<!--        </div>-->
+
+<!--        <div class="modal-actions">-->
+<!--            <button class="btn-cancel" onclick="closeModal()">취소</button>-->
+<!--            <button class="btn-confirm" onclick="generateQuiz()">퀴즈 생성</button>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<div class="loading-overlay" id="loadingOverlay">-->
+<!--    <div class="spinner"></div>-->
+<!--    <p style="margin-top: 15px; font-weight: 600; color: #374151;">AI가 열심히 작업 중입니다...</p>-->
+<!--</div>-->
+
+<!--<script>-->
+<!--    const token = localStorage.getItem('token');-->
+<!--    const userName = localStorage.getItem('userName');-->
+
+<!--    if (!token) {-->
+<!--        alert('로그인이 필요합니다.');-->
+<!--        window.location.href = '/index.html';-->
+<!--    }-->
+
+<!--    document.getElementById('userNameDisplay').textContent = (userName || '사용자') + '님';-->
+
+<!--    const recordCache = new Map();-->
+<!--    let selectedFile = null;-->
+
+<!--    window.addEventListener('load', () => {-->
+<!--        loadRecords();-->
+<!--    });-->
+
+<!--    function handleFileSelect(input) {-->
+<!--        if (input.files && input.files[0]) {-->
+<!--            selectedFile = input.files[0];-->
+<!--            document.getElementById('uploadText').textContent = "선택된 파일: " + selectedFile.name;-->
+<!--            document.getElementById('uploadBtn').style.display = 'inline-block';-->
+<!--        }-->
+<!--    }-->
+
+<!--    async function readJsonSafe(response) {-->
+<!--        const ct = response.headers.get('content-type') || '';-->
+<!--        if (ct.includes('application/json')) return await response.json();-->
+<!--        const text = await response.text();-->
+<!--        return { message: text };-->
+<!--    }-->
+
+<!--    async function uploadFile() {-->
+<!--        if (!selectedFile) return;-->
+
+<!--        const formData = new FormData();-->
+<!--        formData.append('file', selectedFile);-->
+
+<!--        showLoading(true);-->
+
+<!--        try {-->
+<!--            const response = await fetch('/api/v1/stt', {-->
+<!--                method: 'POST',-->
+<!--                headers: { 'Authorization': 'Bearer ' + token },-->
+<!--                body: formData-->
+<!--            });-->
+
+<!--            const api = await readJsonSafe(response);-->
+
+<!--            if (!response.ok) {-->
+<!--                alert('업로드 실패: ' + (api.message || response.statusText));-->
+<!--                return;-->
+<!--            }-->
+
+<!--            const result = api.data;-->
+<!--            alert('변환이 완료되었습니다!');-->
+
+<!--            addRecordToUI({-->
+<!--                id: result.id,-->
+<!--                fileName: selectedFile.name,-->
+<!--                createdAt: Date.now(),-->
+<!--                text: result.text-->
+<!--            });-->
+
+<!--            document.getElementById('uploadText').textContent = "여기를 클릭하여 MP3 파일을 선택하세요";-->
+<!--            document.getElementById('uploadBtn').style.display = 'none';-->
+<!--            selectedFile = null;-->
+
+<!--        } catch (error) {-->
+<!--            console.error('Error:', error);-->
+<!--            alert('오류 발생: ' + error.message);-->
+<!--        } finally {-->
+<!--            showLoading(false);-->
+<!--        }-->
+<!--    }-->
+
+<!--    function addRecordToUI(record) {-->
+<!--        const list = document.getElementById('recordList');-->
+<!--        recordCache.set(record.id, record);-->
+
+<!--        const dateText = record.createdAt-->
+<!--            ? new Date(record.createdAt).toLocaleDateString('ko-KR')-->
+<!--            : new Date().toLocaleDateString('ko-KR');-->
+
+<!--        const itemHTML = `-->
+<!--            <div class="record-item" id="record-${record.id}">-->
+<!--                <div class="record-info">-->
+<!--                    <h3>📄 ${escapeHtml(record.fileName)}</h3>-->
+<!--                    <p>업로드 날짜: ${escapeHtml(dateText)}</p>-->
+<!--                </div>-->
+<!--                <div class="action-buttons">-->
+<!--                    <button class="btn-view" onclick="viewContent(${record.id})">내용 보기</button>-->
+<!--                    <button class="btn-quiz" onclick="openQuizModal(${record.id})">퀴즈 생성</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        `;-->
+
+<!--        list.insertAdjacentHTML('afterbegin', itemHTML);-->
+<!--    }-->
+
+<!--    function viewContent(recordId) {-->
+<!--        const rec = recordCache.get(recordId);-->
+<!--        const text = rec?.text?.trim() ? rec.text : '내용 없음';-->
+<!--        alert('변환 내용:\n' + text);-->
+<!--    }-->
+
+<!--    async function loadRecords() {-->
+<!--        try {-->
+<!--            const response = await fetch('/api/v1/stt/records', {-->
+<!--                method: 'GET',-->
+<!--                headers: { 'Authorization': 'Bearer ' + token }-->
+<!--            });-->
+
+<!--            const api = await readJsonSafe(response);-->
+
+<!--            if (!response.ok) {-->
+<!--                alert('기록 불러오기 실패: ' + (api.message || response.statusText));-->
+<!--                return;-->
+<!--            }-->
+
+<!--            const records = api.data || [];-->
+
+<!--            document.getElementById('recordList').innerHTML = '';-->
+<!--            recordCache.clear();-->
+
+<!--            records.forEach(r => {-->
+<!--                addRecordToUI({-->
+<!--                    id: r.id,-->
+<!--                    fileName: r.fileName,-->
+<!--                    createdAt: r.createdAt,-->
+<!--                    text: r.text-->
+<!--                });-->
+<!--            });-->
+
+<!--        } catch (e) {-->
+<!--            console.error(e);-->
+<!--            alert('기록 불러오기 중 오류: ' + e.message);-->
+<!--        }-->
+<!--    }-->
+
+<!--    function escapeHtml(str) {-->
+<!--        return String(str ?? '')-->
+<!--            .replaceAll('&', '&amp;')-->
+<!--            .replaceAll('<', '&lt;')-->
+<!--            .replaceAll('>', '&gt;')-->
+<!--            .replaceAll('"', '&quot;')-->
+<!--            .replaceAll("'", '&#039;');-->
+<!--    }-->
+
+<!--    function openQuizModal(recordId) {-->
+<!--        document.getElementById('selectedRecordId').value = recordId;-->
+<!--        document.getElementById('quizModal').style.display = 'flex';-->
+<!--    }-->
+
+<!--    function closeModal() {-->
+<!--        document.getElementById('quizModal').style.display = 'none';-->
+<!--    }-->
+
+<!--    // ✅ 여기만 보면 됨: 응답 출력 반영-->
+<!--    async function generateQuiz() {-->
+<!--        const recordId = document.getElementById('selectedRecordId').value;-->
+<!--        const type = document.getElementById('quizType').value;-->
+<!--        const difficulty = document.getElementById('quizDifficulty').value;-->
+
+<!--        closeModal();-->
+<!--        showLoading(true);-->
+
+<!--        try {-->
+<!--            const response = await fetch('/api/v1/quiz', {-->
+<!--                method: 'POST',-->
+<!--                headers: {-->
+<!--                    'Content-Type': 'application/json',-->
+<!--                    'Authorization': 'Bearer ' + token-->
+<!--                },-->
+<!--                body: JSON.stringify({-->
+<!--                    recordId: Number(recordId),-->
+<!--                    type: type,-->
+<!--                    difficulty: difficulty-->
+<!--                })-->
+<!--            });-->
+
+<!--            const api = await readJsonSafe(response);-->
+
+<!--            if (!response.ok) {-->
+<!--                alert('퀴즈 생성 실패: ' + (api.message || response.statusText));-->
+<!--                return;-->
+<!--            }-->
+
+<!--            // ✅ ApiResponse 구조: api.data.content-->
+<!--            alert('퀴즈가 생성되었습니다!\n\n' + (api?.data?.content || '문제 내용 없음'));-->
+
+<!--        } catch (error) {-->
+<!--            console.error(error);-->
+<!--            alert('통신 오류 발생: ' + error.message);-->
+<!--        } finally {-->
+<!--            showLoading(false);-->
+<!--        }-->
+<!--    }-->
+
+<!--    function logout() {-->
+<!--        localStorage.removeItem('token');-->
+<!--        localStorage.removeItem('userId');-->
+<!--        localStorage.removeItem('userName');-->
+<!--        window.location.href = '/index.html';-->
+<!--    }-->
+
+<!--    function showLoading(isShow) {-->
+<!--        document.getElementById('loadingOverlay').style.display = isShow ? 'flex' : 'none';-->
+<!--    }-->
+<!--</script>-->
+
+<!--</body>-->
+<!--</html>-->
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduNote - 대시보드</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+          background: #f3f4f6;
+          min-height: 100vh;
+        }
+
+        .navbar {
+          background: white;
+          padding: 16px 40px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .navbar-brand { font-size: 20px; font-weight: 700; color: #1f2937; }
+        .user-info { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+        .btn-logout {
+          color: #dc2626;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-weight: 600;
+        }
+
+        .container {
+          max-width: 1000px;
+          margin: 40px auto;
+          padding: 0 20px;
+        }
+
+        .card {
+          background: white;
+          border-radius: 12px;
+          padding: 30px;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+          margin-bottom: 30px;
+        }
+        .card h2 { margin-bottom: 20px; font-size: 20px; color: #1f2937; }
+
+        .upload-area {
+          border: 2px dashed #e5e7eb;
+          border-radius: 8px;
+          padding: 40px;
+          text-align: center;
+          transition: all 0.2s;
+          cursor: pointer;
+        }
+        .upload-area:hover { border-color: #2563eb; background: #f8fafc; }
+        .upload-icon { font-size: 40px; color: #9ca3af; margin-bottom: 10px; }
+        .file-input { display: none; }
+        .btn-upload {
+          margin-top: 15px;
+          padding: 10px 24px;
+          background: #2563eb;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-weight: 600;
+          cursor: pointer;
+          display: none;
+        }
+
+        .record-list { display: flex; flex-direction: column; gap: 15px; }
+        .record-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          transition: 0.2s;
+        }
+        .record-item:hover { border-color: #2563eb; }
+        .record-info h3 { font-size: 16px; margin-bottom: 4px; }
+        .record-info p { font-size: 13px; color: #6b7280; }
+
+        .action-buttons { display: flex; gap: 8px; }
+        .btn-quiz {
+          padding: 8px 16px;
+          background: #10b981;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+        .btn-view {
+          padding: 8px 16px;
+          background: #f3f4f6;
+          color: #374151;
+          border: none;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .loading-overlay {
+          position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+          background: rgba(255,255,255,0.8);
+          display: none;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+          z-index: 2000;
+        }
+        .spinner {
+          width: 40px; height: 40px;
+          border: 4px solid #e5e7eb; border-top: 4px solid #2563eb;
+          border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="navbar-brand">EduNote Dashboard</div>
+    <div class="user-info">
+        <span id="userNameDisplay">사용자님</span>
+        <button class="btn-logout" onclick="logout()">로그아웃</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>새로운 강의 녹음 업로드</h2>
+        <div class="upload-area" onclick="document.getElementById('voiceFile').click()">
+            <div class="upload-icon">🎙️</div>
+            <p id="uploadText">여기를 클릭하여 MP3 파일을 선택하세요</p>
+            <input type="file" id="voiceFile" class="file-input" accept="audio/*" onchange="handleFileSelect(this)">
+        </div>
+        <div style="text-align: center;">
+            <button class="btn-upload" id="uploadBtn" onclick="uploadFile()">변환 시작하기</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>내 학습 기록</h2>
+        <div class="record-list" id="recordList"></div>
+    </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p style="margin-top: 15px; font-weight: 600; color: #374151;">AI가 열심히 작업 중입니다...</p>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    const userName = localStorage.getItem('userName');
+
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      window.location.href = '/index.html';
+    }
+
+    document.getElementById('userNameDisplay').textContent = (userName || '사용자') + '님';
+
+    const recordCache = new Map();
+    let selectedFile = null;
+
+    window.addEventListener('load', () => {
+      loadRecords();
+    });
+
+    function handleFileSelect(input) {
+      if (input.files && input.files[0]) {
+        selectedFile = input.files[0];
+        document.getElementById('uploadText').textContent = "선택된 파일: " + selectedFile.name;
+        document.getElementById('uploadBtn').style.display = 'inline-block';
+      }
+    }
+
+    async function readJsonSafe(response) {
+      const ct = response.headers.get('content-type') || '';
+      if (ct.includes('application/json')) return await response.json();
+      const text = await response.text();
+      return { message: text };
+    }
+
+    async function uploadFile() {
+      if (!selectedFile) return;
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      showLoading(true);
+
+      try {
+        const response = await fetch('/api/v1/stt', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: formData
+        });
+
+        const api = await readJsonSafe(response);
+
+        if (!response.ok) {
+          alert('업로드 실패: ' + (api.message || response.statusText));
+          return;
+        }
+
+        const result = api.data; // {id, text}
+        alert('변환이 완료되었습니다!');
+
+        // 새로 만든 건 최신이라 맨 위에
+        addRecordToUI({
+          id: result.id,
+          fileName: selectedFile.name,
+          createdAt: Date.now(),
+          text: result.text
+        }, true);
+
+        document.getElementById('uploadText').textContent = "여기를 클릭하여 MP3 파일을 선택하세요";
+        document.getElementById('uploadBtn').style.display = 'none';
+        selectedFile = null;
+
+      } catch (error) {
+        console.error('Error:', error);
+        alert('오류 발생: ' + error.message);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function addRecordToUI(record, prepend) {
+      const list = document.getElementById('recordList');
+      recordCache.set(record.id, record);
+
+      const dateText = record.createdAt
+        ? new Date(record.createdAt).toLocaleDateString('ko-KR')
+        : new Date().toLocaleDateString('ko-KR');
+
+      const itemHTML = `
+        <div class="record-item" id="record-${record.id}">
+          <div class="record-info">
+            <h3>📄 ${escapeHtml(record.fileName)}</h3>
+            <p>업로드 날짜: ${escapeHtml(dateText)}</p>
+          </div>
+          <div class="action-buttons">
+            <button class="btn-view" onclick="viewContent(${record.id})">내용 보기</button>
+            <button class="btn-quiz" onclick="goQuizPage(${record.id})">퀴즈 페이지</button>
+          </div>
+        </div>
+      `;
+
+      if (prepend) list.insertAdjacentHTML('afterbegin', itemHTML);
+      else list.insertAdjacentHTML('beforeend', itemHTML);
+    }
+
+    function viewContent(recordId) {
+      const rec = recordCache.get(recordId);
+      const text = rec?.text?.trim() ? rec.text : '내용 없음';
+      alert('변환 내용:\n' + text);
+    }
+
+    // 새로고침 시 DB에서 목록 다시 불러오기 (네 프로젝트에 이미 /api/v1/stt/records 구현했다고 가정)
+    async function loadRecords() {
+      try {
+        const response = await fetch('/api/v1/stt/records', {
+          method: 'GET',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        const api = await readJsonSafe(response);
+
+        if (!response.ok) {
+          alert('기록 불러오기 실패: ' + (api.message || response.statusText));
+          return;
+        }
+
+        const records = api.data || [];
+
+        document.getElementById('recordList').innerHTML = '';
+        recordCache.clear();
+
+        // 서버가 최신순으로 주는 게 가장 좋고,
+        // 여기서는 받은 순서대로 "아래로" 붙여서 UI도 최신순 유지하게 함
+        records.forEach(r => {
+          addRecordToUI({
+            id: r.id,
+            fileName: r.fileName || ('record #' + r.id),
+            createdAt: r.createdAt,
+            text: r.text
+          }, false);
+        });
+
+      } catch (e) {
+        console.error(e);
+        alert('기록 불러오기 중 오류: ' + e.message);
+      }
+    }
+
+    function goQuizPage(recordId) {
+      window.location.href = '/quiz.html?recordId=' + encodeURIComponent(recordId);
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('userName');
+      window.location.href = '/index.html';
+    }
+
+    function showLoading(isShow) {
+      document.getElementById('loadingOverlay').style.display = isShow ? 'flex' : 'none';
+    }
+</script>
+
+</body>
+</html>
