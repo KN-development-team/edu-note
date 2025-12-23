@@ -51,4 +51,6 @@ public class SttController {
         List<SttRecordResponse> records = sttService.getMyRecords(userDetails.getUser());
         return ResponseEntity.ok(ApiResponse.success("내 학습 기록 조회 성공", records));
     }
+
+    
 }
