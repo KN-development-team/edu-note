@@ -117,8 +117,14 @@
 
         <div class="content-box" id="contentText">불러오는 중...</div>
 
+        <div id="summaryBox" style="margin-top:18px; display:none;">
+          <h3 style="margin-bottom:8px;">📝 요약 결과</h3>
+          <div class="content-box" id="summaryText" style="background:#fffbe6; border-color:#fef3c7; color:#92400e;"></div>
+        </div>
+
         <div class="actions">
-            <button class="btn btn-back" onclick="goBack()">← 대시보드</button>
+          <button class="btn btn-back" onclick="goBack()">← 대시보드</button>
+          <button class="btn btn-copy" id="summarizeBtn" onclick="summarizeRecord()" style="display:none;">요약하기</button>
         </div>
     </div>
 </div>
@@ -178,6 +184,8 @@
           const api = await readJsonSafe(resp);
           const r = api.data || {};
           renderRecord(r);
+          showLoading(false);
+          await loadExistingSummary();
           return;
         }
 
@@ -190,6 +198,7 @@
         const api = await readJsonSafe(resp);
         if (!resp.ok) {
           alert('기록 불러오기 실패: ' + (api.message || resp.statusText));
+          showLoading(false);
           return;
         }
 
@@ -198,6 +207,7 @@
 
         if (!found) {
           alert('해당 recordId의 기록을 찾을 수 없습니다.');
+          showLoading(false);
           return;
         }
 
@@ -208,6 +218,8 @@
         alert('오류 발생: ' + e.message);
       } finally {
         showLoading(false);
+        // 레코드 로드 완료 후 기존 요약 로드 시도
+        await loadExistingSummary();
       }
     }
 
@@ -222,6 +234,33 @@
       document.getElementById('contentText').textContent = text;
     }
 
+async function loadExistingSummary() {
+  try {
+    const resp = await fetch(`/api/records/${encodeURIComponent(recordId)}/summary`, {
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+
+    if (resp.ok) {
+      const api = await readJsonSafe(resp);
+      const data = api.data || {};
+      const content = data.summary_content || '';
+
+      if (String(content).trim()) {
+        document.getElementById('summaryText').textContent = content;
+        document.getElementById('summaryBox').style.display = 'block';
+        document.getElementById('summarizeBtn').style.display = 'none';
+        return;
+      }
+    }
+  } catch (e) {
+    console.log('기존 요약 로드 실패:', e.message);
+  }
+
+  document.getElementById('summarizeBtn').style.display = 'block';
+}
+
+
     function goBack() {
       window.location.href = '/dashboard.html';
     }
@@ -231,6 +270,48 @@
       localStorage.removeItem('userId');
       localStorage.removeItem('userName');
       window.location.href = '/index.html';
+    }
+
+    async function summarizeRecord() {
+      const btn = document.getElementById('summarizeBtn');
+      try {
+        if (!confirm('요약을 생성하시겠어요?')) return;
+        btn.disabled = true;
+        btn.textContent = '요약중...';
+        showLoading(true);
+
+        const resp = await fetch(`/api/records/${encodeURIComponent(recordId)}/summary`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        const api = await readJsonSafe(resp);
+        if (!resp.ok) {
+          throw new Error((api && api.message) || resp.statusText || '요약 요청 실패');
+        }
+
+        const data = api.data || api;
+
+        const content =
+          data.summary_content ||
+          data.content ||
+          data.summary ||
+          '';
+
+        // content가 비어있을 때를 대비한 디버기용
+        const finalText = String(content).trim() ? content : '요약 결과가 비어있습니다.';
+
+        document.getElementById('summaryText').textContent = finalText;
+        document.getElementById('summaryBox').style.display = 'block';
+        btn.style.display = 'none'; // 요약 완료 후 버튼 숨김
+      } catch (e) {
+        console.error(e);
+        alert('요약 중 오류가 발생했습니다: ' + (e.message || e));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '요약하기';
+        showLoading(false);
+      }
     }
 
     window.addEventListener('load', loadRecord);
