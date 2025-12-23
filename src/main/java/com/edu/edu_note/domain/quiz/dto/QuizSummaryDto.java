@@ -1,5 +1,6 @@
 package com.edu.edu_note.domain.quiz.dto;
 
+//퀴즈 기록 화면에 뿌릴 요약 정보만 담는 DTO
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
