@@ -69,6 +69,7 @@ public class SecurityConfig {
                                 "/",
                                 "/index.html",
                                 "/dashboard.html",
+                                "/content.html",
                                 "/quiz.html",
 //                                "/favicon.ico",
                                 "/static/**",
