@@ -1,14 +1,29 @@
-package com.edu.edu_note.domain.quiz.dto;
+package com.edu.edu_note.domain.quiz.dto; //퀴즈 기록 조회용
 
-import lombok.AllArgsConstructor;
+import com.edu.edu_note.domain.quiz.entity.Quiz;
+import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
-@AllArgsConstructor
+@Builder
 public class QuizResponseDto {
-    private Long id;         // quiz.id
-    private Long recordId;   // quiz.record_id
-    private String type;     // quiz.type
-    private String level;    // quiz.level
-    private String content;  // quiz.content (AI가 만든 결과)
+    private Long id;
+    private Long recordId;
+    private String type;
+    private String level;      // DB 컬럼명 level
+    private String content;    // JSON 문자열 그대로 저장한 값
+    private LocalDateTime createdAt;
+
+    public static QuizResponseDto from(Quiz quiz) {
+        return QuizResponseDto.builder()
+                .id(quiz.getId())
+                .recordId(quiz.getVoiceRecord().getId())
+                .type(quiz.getType())
+                .level(quiz.getLevel())
+                .content(quiz.getContent())
+                .createdAt(quiz.getCreatedAt())
+                .build();
+    }
 }
