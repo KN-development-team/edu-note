@@ -3,156 +3,363 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduNote - 대시보드</title>
+    <title>EduNote - 워크스페이스</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #2563eb;         /* 메인 블루 */
+            --primary-bg: #eff6ff;      /* 연한 블루 배경 */
+            --text-main: #111827;       /* 진한 검정 */
+            --text-sub: #6b7280;        /* 회색 텍스트 */
+            --bg-body: #ffffff;         /* 전체 흰색 배경 */
+            --bg-sidebar: #f9fafb;      /* 사이드바 연회색 */
+            --border: #e5e7eb;          /* 연한 테두리 */
+            --sidebar-width: 250px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+
         body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-          background: #f3f4f6;
-          min-height: 100vh;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
         }
 
-        .navbar {
-          background: white;
-          padding: 16px 40px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .navbar-brand { font-size: 20px; font-weight: 700; color: #1f2937; }
-        .user-info { display: flex; align-items: center; gap: 16px; font-size: 14px; }
-        .btn-logout {
-          color: #dc2626;
-          background: none;
-          border: none;
-          cursor: pointer;
-          font-weight: 600;
+        /* 1. 사이드바 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
         }
 
-        .container {
-          max-width: 1000px;
-          margin: 40px auto;
-          padding: 0 20px;
+        .logo-area {
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .logo-icon { color: var(--primary); }
+
+        .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-sub);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s;
         }
 
-        .card {
-          background: white;
-          border-radius: 12px;
-          padding: 30px;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-          margin-bottom: 30px;
-        }
-        .card h2 { margin-bottom: 20px; font-size: 20px; color: #1f2937; }
+        .nav-item:hover { background: #f3f4f6; color: var(--text-main); }
+        .nav-item.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-weight: 600; border: 1px solid var(--border); }
 
+        .user-profile {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 36px; height: 36px;
+            background: #e5e7eb;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 14px; color: var(--text-sub);
+        }
+
+        .user-info { flex: 1; font-size: 14px; }
+        .user-name { font-weight: 600; color: var(--text-main); }
+        .logout-btn { background: none; border: none; cursor: pointer; color: var(--text-sub); font-size: 14px; }
+        .logout-btn:hover { color: #ef4444; }
+
+        /* 2. 메인 컨텐츠 */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 40px 60px;
+            max-width: 1400px;
+        }
+
+        /* --- [수정됨] 헤더 (환영 문구 개선) --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 48px; /* 여백 증가 */
+        }
+
+        .greeting h1 {
+            font-size: 32px; /* 폰트 크기 증가 */
+            font-weight: 800; /* 더 두껍게 */
+            letter-spacing: -0.5px; /* 자간 조정 */
+            margin-bottom: 12px; /* 간격 증가 */
+            color: var(--text-main);
+            display: flex; /* 이모지 정렬 */
+            align-items: center;
+            gap: 8px;
+        }
+
+        .greeting p {
+            color: var(--text-sub);
+            font-size: 18px; /* 폰트 크기 증가 */
+            line-height: 1.5;
+        }
+
+        /* 손 흔드는 애니메이션 */
+        .waving-hand {
+            display: inline-block;
+            animation: wave 2.5s infinite;
+            transform-origin: 70% 70%;
+        }
+
+        @keyframes wave {
+            0% { transform: rotate( 0.0deg) }
+            10% { transform: rotate(14.0deg) }
+            20% { transform: rotate(-8.0deg) }
+            30% { transform: rotate(14.0deg) }
+            40% { transform: rotate(-4.0deg) }
+            50% { transform: rotate(10.0deg) }
+            60% { transform: rotate( 0.0deg) }
+            100% { transform: rotate( 0.0deg) }
+        }
+        /* ------------------------------------ */
+
+        /* 통계 카드 */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: white;
+        }
+
+        .stat-label { font-size: 14px; color: var(--text-sub); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .stat-value { font-size: 32px; font-weight: 700; color: var(--text-main); }
+
+        /* 업로드 영역 */
         .upload-area {
-          border: 2px dashed #e5e7eb;
-          border-radius: 8px;
-          padding: 40px;
-          text-align: center;
-          transition: all 0.2s;
-          cursor: pointer;
+            margin-bottom: 50px;
         }
-        .upload-area:hover { border-color: #2563eb; background: #f8fafc; }
-        .upload-icon { font-size: 40px; color: #9ca3af; margin-bottom: 10px; }
-        .file-input { display: none; }
-        .btn-upload {
-          margin-top: 15px;
-          padding: 10px 24px;
-          background: #2563eb;
-          color: white;
-          border: none;
-          border-radius: 6px;
-          font-weight: 600;
-          cursor: pointer;
-          display: none;
+        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--text-main); }
+
+        .drop-zone {
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            background: #f9fafb;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .record-list { display: flex; flex-direction: column; gap: 15px; }
-        .record-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 20px;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          transition: 0.2s;
-        }
-        .record-item:hover { border-color: #2563eb; }
-        .record-info h3 { font-size: 16px; margin-bottom: 4px; }
-        .record-info p { font-size: 13px; color: #6b7280; }
+        .drop-zone:hover { border-color: var(--primary); background: var(--primary-bg); }
+        .drop-zone.dragover { border-color: var(--primary); background: var(--primary-bg); transform: scale(0.99); }
 
-        .action-buttons { display: flex; gap: 8px; }
-        .btn-quiz {
-          padding: 8px 16px;
-          background: #10b981;
-          color: white;
-          border: none;
-          border-radius: 6px;
-          font-size: 13px;
-          font-weight: 600;
-          cursor: pointer;
-        }
-        .btn-view {
-          padding: 8px 16px;
-          background: #f3f4f6;
-          color: #374151;
-          border: none;
-          border-radius: 6px;
-          font-size: 13px;
-          font-weight: 600;
-          cursor: pointer;
+        .drop-icon { font-size: 32px; color: #9ca3af; margin-bottom: 16px; }
+        .drop-text { font-size: 16px; font-weight: 500; color: var(--text-main); margin-bottom: 4px; }
+        .drop-sub { font-size: 13px; color: var(--text-sub); }
+
+        /* 리스트 */
+        .file-list-container {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
         }
 
+        .list-header {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr;
+            padding: 16px 24px;
+            background: #f9fafb;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
+        }
+
+        .list-body {
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .list-item {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            transition: background 0.1s;
+        }
+        .list-item:last-child { border-bottom: none; }
+        .list-item:hover { background: #f9fafb; }
+
+        .item-name { display: flex; align-items: center; gap: 12px; font-weight: 500; color: var(--text-main); }
+        .item-icon {
+            width: 32px; height: 32px;
+            background: var(--primary-bg); color: var(--primary);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+        }
+
+        .item-date, .item-status { font-size: 14px; color: var(--text-sub); }
+
+        .badge {
+            display: inline-block; padding: 4px 8px;
+            border-radius: 6px; font-size: 12px; font-weight: 500;
+            background: #dcfce7; color: #15803d;
+        }
+
+        .action-area { text-align: right; }
+        .btn-icon {
+            padding: 8px; border: 1px solid var(--border); border-radius: 6px;
+            background: white; cursor: pointer; color: var(--text-sub); transition: all 0.2s;
+        }
+        .btn-icon:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* 로딩 오버레이 */
         .loading-overlay {
-          position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-          background: rgba(255,255,255,0.8);
-          display: none;
-          justify-content: center;
-          align-items: center;
-          flex-direction: column;
-          z-index: 2000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 100; display: none;
+            justify-content: center; align-items: center; flex-direction: column;
         }
         .spinner {
-          width: 40px; height: 40px;
-          border: 4px solid #e5e7eb; border-top: 4px solid #2563eb;
-          border-radius: 50%; animation: spin 1s linear infinite;
+            width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top-color: var(--primary);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .empty-state { text-align: center; padding: 60px 0; color: var(--text-sub); }
+
+        @media (max-width: 1024px) {
+            .list-header, .list-item { grid-template-columns: 2fr 1fr 1fr; }
+            .list-header > div:nth-child(3), .list-item > div:nth-child(3) { display: none; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 20px; }
+            .stats-container { grid-template-columns: 1fr; }
+            .list-header { display: none; }
+            .list-item { grid-template-columns: 1fr; gap: 10px; }
+            .action-area { text-align: left; }
+        }
     </style>
 </head>
 <body>
 
-<div class="navbar">
-    <div class="navbar-brand">EduNote Dashboard</div>
-    <div class="user-info">
-        <span id="userNameDisplay">사용자님</span>
-        <button class="btn-logout" onclick="logout()">로그아웃</button>
-    </div>
-</div>
-
-<div class="container">
-    <div class="card">
-        <h2>새로운 강의 녹음 업로드</h2>
-        <div class="upload-area" onclick="document.getElementById('voiceFile').click()">
-            <div class="upload-icon">🎙️</div>
-            <p id="uploadText">여기를 클릭하여 MP3 파일을 선택하세요</p>
-            <input type="file" id="voiceFile" class="file-input" accept="audio/*" onchange="handleFileSelect(this)">
-        </div>
-        <div style="text-align: center;">
-            <button class="btn-upload" id="uploadBtn" onclick="uploadFile()">변환 시작하기</button>
-        </div>
+<nav class="sidebar">
+    <div class="logo-area">
+        <i class="fa-solid fa-shapes logo-icon"></i> EduNote
     </div>
 
-    <div class="card">
-        <h2>내 학습 기록</h2>
-        <div class="record-list" id="recordList"></div>
+    <div class="nav-menu">
+        <a href="#" class="nav-item active"><i class="fa-solid fa-house"></i> 홈</a>
+        <a href="#" class="nav-item"><i class="fa-solid fa-folder"></i> 내 파일함</a>
+        <a href="#" class="nav-item"><i class="fa-solid fa-chart-simple"></i> 통계</a>
     </div>
-</div>
+
+    <div class="user-profile">
+        <div class="avatar" id="userAvatar">U</div>
+        <div class="user-info">
+            <div class="user-name" id="userNameDisplay">사용자</div>
+        </div>
+        <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+    </div>
+</nav>
+
+<main class="main-content">
+    <header class="header">
+        <div class="greeting">
+            <h1 id="greeting">
+                <span id="greetingName">사용자님</span>, 안녕하세요
+                <span class="waving-hand">👋</span>
+            </h1>
+            <p>오늘도 효율적인 학습을 도와드릴게요.</p>
+        </div>
+    </header>
+
+    <section class="stats-container">
+        <div class="stat-card">
+            <div class="stat-label"><i class="fa-solid fa-file-audio"></i> 총 파일</div>
+            <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label"><i class="fa-solid fa-align-left"></i> 변환된 글자</div>
+            <div class="stat-value" id="statChars">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label"><i class="fa-solid fa-clock"></i> 예상 녹음 시간</div>
+            <div class="stat-value" id="statTime">0m</div>
+        </div>
+    </section>
+
+    <section class="upload-area">
+        <div class="section-title">새로운 녹음 업로드</div>
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('voiceFile').click()">
+            <div class="drop-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+            <div class="drop-text" id="uploadText">파일을 이곳에 드래그하거나 클릭하세요</div>
+            <div class="drop-sub">MP3, M4A, WAV (최대 100MB)</div>
+            <input type="file" id="voiceFile" hidden accept="audio/*" onchange="handleFileSelect(this)">
+        </div>
+    </section>
+
+    <section class="file-list-area">
+        <div class="section-title">최근 파일</div>
+        <div class="file-list-container">
+            <div class="list-header">
+                <div>파일명</div>
+                <div>날짜</div>
+                <div>상태</div>
+                <div style="text-align: right;">작업</div>
+            </div>
+            <div class="list-body" id="recordList">
+                <div class="empty-state">
+                    <i class="fa-regular fa-folder-open" style="font-size: 32px; margin-bottom: 12px;"></i>
+                    <p>아직 업로드된 파일이 없습니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
 
 <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
-    <p style="margin-top: 15px; font-weight: 600; color: #374151;">AI가 열심히 작업 중입니다...</p>
+    <p style="margin-top: 16px; font-weight: 600; color: #374151;">AI가 분석 중입니다...</p>
 </div>
 
 <script>
@@ -160,177 +367,209 @@
     const userName = localStorage.getItem('userName');
 
     if (!token) {
-      alert('로그인이 필요합니다.');
-      window.location.href = '/index.html';
+        // 로그인 체크가 필요하면 아래 주석 해제
+        // alert('로그인이 필요합니다.');
+        // window.location.href = '/index.html';
     }
 
-    document.getElementById('userNameDisplay').textContent = (userName || '사용자') + '님';
+    // [수정됨] 사용자 이름 업데이트 로직 변경 (이모지 보존)
+    document.getElementById('userNameDisplay').textContent = userName || '사용자';
+    const displayName = userName || '사용자';
+    document.getElementById('greetingName').textContent = displayName + '님';
 
-    const recordCache = new Map();
-    let selectedFile = null;
+    if(userName) document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
 
-    window.addEventListener('load', () => {
-      loadRecords();
+    // --- 드래그 앤 드롭 ---
+    const dropZone = document.getElementById('dropZone');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); }, false);
     });
 
-    function handleFileSelect(input) {
-      if (input.files && input.files[0]) {
-        selectedFile = input.files[0];
-        document.getElementById('uploadText').textContent = "선택된 파일: " + selectedFile.name;
-        document.getElementById('uploadBtn').style.display = 'inline-block';
-      }
-    }
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+    });
 
-    async function readJsonSafe(response) {
-      const ct = response.headers.get('content-type') || '';
-      if (ct.includes('application/json')) return await response.json();
-      const text = await response.text();
-      return { message: text };
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if(files.length) {
+            document.getElementById('voiceFile').files = files;
+            handleFileSelect(document.getElementById('voiceFile'));
+        }
+    }, false);
+
+    // --- 파일 선택 핸들러 ---
+    let selectedFile = null;
+
+    function handleFileSelect(input) {
+        if (input.files && input.files[0]) {
+            selectedFile = input.files[0];
+            document.getElementById('uploadText').innerHTML = `
+                <span style="color:var(--primary); font-weight:700;">${selectedFile.name}</span> 선택됨
+            `;
+
+            if(confirm(`'${selectedFile.name}' 파일을 변환하시겠습니까?`)) {
+                uploadFile();
+            }
+        }
     }
 
     async function uploadFile() {
-      if (!selectedFile) return;
+        if (!selectedFile) return;
+        const formData = new FormData();
+        formData.append('file', selectedFile);
 
-      const formData = new FormData();
-      formData.append('file', selectedFile);
+        showLoading(true);
 
-      showLoading(true);
+        try {
+            const response = await fetch('/api/v1/stt', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token },
+                body: formData
+            });
 
-      try {
-        const response = await fetch('/api/v1/stt', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token },
-          body: formData
-        });
+            const data = await response.json();
 
-        const api = await readJsonSafe(response);
+            if (!response.ok) throw new Error(data.message || '업로드 실패');
 
-        if (!response.ok) {
-          alert('업로드 실패: ' + (api.message || response.statusText));
-          return;
+            // 성공 시 UI 업데이트
+            addRecordToUI({
+                id: data.data.id,
+                fileName: selectedFile.name,
+                createdAt: Date.now(),
+                text: data.data.text
+            }, true);
+
+            // 초기화
+            document.getElementById('uploadText').textContent = '파일을 이곳에 드래그하거나 클릭하세요';
+            selectedFile = null;
+            document.getElementById('voiceFile').value = '';
+
+            // 카운트 증가
+            const totalEl = document.getElementById('statTotal');
+            totalEl.innerText = parseInt(totalEl.innerText) + 1;
+
+            // 글자 수 및 시간 업데이트
+            if(data.data.text) {
+                const charEl = document.getElementById('statChars');
+                // 기존 콤마 제거 후 숫자 변환
+                const currentChars = parseInt(charEl.innerText.replace(/,/g, '')) || 0;
+                const newChars = currentChars + data.data.text.length;
+
+                charEl.innerText = newChars.toLocaleString();
+
+                // 시간 재계산
+                const timeEl = document.getElementById('statTime');
+                const estMin = Math.floor(newChars / 300);
+                if (estMin > 60) timeEl.innerText = (estMin / 60).toFixed(1) + 'h';
+                else timeEl.innerText = estMin + 'm';
+            }
+            alert('변환 완료!');
+
+        } catch (error) {
+            console.error(error);
+            alert('오류: ' + error.message);
+        } finally {
+            showLoading(false);
         }
+    }
 
-        const result = api.data; // {id, text}
-        alert('변환이 완료되었습니다!');
+    // --- 리스트 불러오기 ---
+    window.addEventListener('load', loadRecords);
 
-        // 새로 만든 건 최신이라 맨 위에
-        addRecordToUI({
-          id: result.id,
-          fileName: selectedFile.name,
-          createdAt: Date.now(),
-          text: result.text
-        }, true);
+    async function loadRecords() {
+        try {
+            const response = await fetch('/api/v1/stt/records', {
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
 
-        document.getElementById('uploadText').textContent = "여기를 클릭하여 MP3 파일을 선택하세요";
-        document.getElementById('uploadBtn').style.display = 'none';
-        selectedFile = null;
+            const records = data.data || [];
+            const listEl = document.getElementById('recordList');
 
-      } catch (error) {
-        console.error('Error:', error);
-        alert('오류 발생: ' + error.message);
-      } finally {
-        showLoading(false);
-      }
+            if(records.length > 0) listEl.innerHTML = '';
+
+            // 1. 총 파일 개수
+            document.getElementById('statTotal').innerText = records.length;
+
+            // 2. 총 글자 수 계산 및 시간 추정
+            let totalCharCount = 0;
+            records.forEach(r => {
+                if (r.text) {
+                    totalCharCount += r.text.length;
+                }
+            });
+
+            // 3. 변환된 글자 수 표시 (천 단위 콤마)
+            document.getElementById('statChars').innerText = totalCharCount.toLocaleString();
+
+            // 4. 예상 시간 계산 (평균 말하기 속도: 분당 300자 가정)
+            const estimatedMinutes = Math.floor(totalCharCount / 300);
+
+            if (estimatedMinutes > 60) {
+                // 60분이 넘으면 '시간' 단위로 표시 (예: 1.5h)
+                document.getElementById('statTime').innerText = (estimatedMinutes / 60).toFixed(1) + 'h';
+            } else {
+                // 아니면 '분' 단위로 표시 (예: 45m)
+                document.getElementById('statTime').innerText = estimatedMinutes + 'm';
+            }
+
+            records.forEach(r => {
+                addRecordToUI({
+                    id: r.id,
+                    fileName: r.fileName || `녹음 파일 #${r.id}`,
+                    createdAt: r.createdAt,
+                    text: r.text
+                }, false);
+            });
+
+        } catch(e) { console.error(e); }
     }
 
     function addRecordToUI(record, prepend) {
-      const list = document.getElementById('recordList');
-      recordCache.set(String(record.id), record);
+        const list = document.getElementById('recordList');
+        if(list.querySelector('.empty-state')) list.innerHTML = '';
 
-      const dateText = record.createdAt
-        ? new Date(record.createdAt).toLocaleDateString('ko-KR')
-        : new Date().toLocaleDateString('ko-KR');
+        const dateStr = record.createdAt
+            ? new Date(record.createdAt).toLocaleDateString('ko-KR')
+            : '-';
 
-      const itemHTML = `
-        <div class="record-item" id="record-${escapeHtml(String(record.id))}">
-          <div class="record-info">
-            <h3>📄 ${escapeHtml(record.fileName)}</h3>
-            <p>업로드 날짜: ${escapeHtml(dateText)}</p>
-          </div>
-          <div class="action-buttons">
-            <button class="btn-view" onclick="viewContent('${escapeAttr(String(record.id))}')">내용 보기</button>
-            <button class="btn-quiz" onclick="goQuizPage('${escapeAttr(String(record.id))}')">퀴즈 페이지</button>
-          </div>
-        </div>
-      `;
+        const html = `
+            <div class="list-item">
+                <div class="item-name">
+                    <div class="item-icon"><i class="fa-solid fa-file-audio"></i></div>
+                    <span>${record.fileName}</span>
+                </div>
+                <div class="item-date">${dateStr}</div>
+                <div class="item-status"><span class="badge">완료</span></div>
+                <div class="action-area">
+                    <button class="btn-icon" onclick="location.href='/content.html?recordId=${record.id}'" title="보기">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                    <button class="btn-icon" onclick="location.href='/quiz.html?recordId=${record.id}'" title="퀴즈">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                </div>
+            </div>
+        `;
 
-      if (prepend) list.insertAdjacentHTML('afterbegin', itemHTML);
-      else list.insertAdjacentHTML('beforeend', itemHTML);
-    }
-
-    // alert 대신 페이지 이동
-    function viewContent(recordId) {
-      window.location.href = '/content.html?recordId=' + encodeURIComponent(recordId);
-    }
-
-    // 새로고침 시 DB에서 목록 다시 불러오기
-    async function loadRecords() {
-      try {
-        const response = await fetch('/api/v1/stt/records', {
-          method: 'GET',
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-
-        const api = await readJsonSafe(response);
-
-        if (!response.ok) {
-          alert('기록 불러오기 실패: ' + (api.message || response.statusText));
-          return;
-        }
-
-        const records = api.data || [];
-
-        document.getElementById('recordList').innerHTML = '';
-        recordCache.clear();
-
-        // 서버가 최신순으로 주는 게 가장 좋고,
-        // 여기서는 받은 순서대로 "아래로" 붙여서 UI도 최신순 유지하게 함
-        records.forEach(r => {
-          addRecordToUI({
-            id: r.id,
-            fileName: r.fileName || ('record #' + r.id),
-            createdAt: r.createdAt,
-            text: r.text
-          }, false);
-        });
-
-      } catch (e) {
-        console.error(e);
-        alert('기록 불러오기 중 오류: ' + e.message);
-      }
-    }
-
-    function goQuizPage(recordId) {
-      window.location.href = '/quiz.html?recordId=' + encodeURIComponent(recordId);
-    }
-
-    function escapeHtml(str) {
-      return String(str ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
-    // onclick 속성 안에 들어가는 값용(따옴표/백슬래시 안전)
-    function escapeAttr(str) {
-      return String(str ?? '')
-        .replaceAll('\\', '\\\\')
-        .replaceAll("'", "\\'")
-        .replaceAll('\n', '\\n')
-        .replaceAll('\r', '\\r');
+        if (prepend) list.insertAdjacentHTML('afterbegin', html);
+        else list.insertAdjacentHTML('beforeend', html);
     }
 
     function logout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('userName');
-      window.location.href = '/index.html';
+        localStorage.clear();
+        window.location.href = '/index.html';
     }
 
-    function showLoading(isShow) {
-      document.getElementById('loadingOverlay').style.display = isShow ? 'flex' : 'none';
+    function showLoading(show) {
+        document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
     }
 </script>
 
