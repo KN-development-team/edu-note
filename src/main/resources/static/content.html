@@ -174,20 +174,20 @@
     async function loadRecord() {
       showLoading(true);
       try {
-        // (1) detail endpoint 시도
-        let resp = await fetch('/api/v1/stt/records/' + encodeURIComponent(recordId), {
-          method: 'GET',
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
+<!--        // (1) detail endpoint 시도-->
+<!--        let resp = await fetch('/api/v1/stt/records/' + encodeURIComponent(recordId), {-->
+<!--          method: 'GET',-->
+<!--          headers: { 'Authorization': 'Bearer ' + token }-->
+<!--        });-->
 
-        if (resp.ok) {
-          const api = await readJsonSafe(resp);
-          const r = api.data || {};
-          renderRecord(r);
-          showLoading(false);
-          await loadExistingSummary();
-          return;
-        }
+<!--        if (resp.ok) {-->
+<!--          const api = await readJsonSafe(resp);-->
+<!--          const r = api.data || {};-->
+<!--          renderRecord(r);-->
+<!--          showLoading(false);-->
+<!--          await loadExistingSummary();-->
+<!--          return;-->
+<!--        }-->
 
         // (2) fallback: list endpoint
         resp = await fetch('/api/v1/stt/records', {
