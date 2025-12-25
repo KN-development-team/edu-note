@@ -91,6 +91,8 @@ jobs:
                   - AI_SERVER_URL=http://ai-server:8000
                   - OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
                   - GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
+                  - JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            
             
             
                   # [AWS S3 설정]
