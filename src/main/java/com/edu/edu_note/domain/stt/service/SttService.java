@@ -108,6 +108,23 @@ public class SttService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public SttRecordResponse getRecordById(User user, Long recordId) {
+        VoiceRecord r = voiceRecordRepository.findById(recordId)
+                .orElseThrow(() -> new IllegalArgumentException("record not found"));
+
+        if (r.getUser() == null || !r.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("forbidden");
+        }
+
+        return new SttRecordResponse(
+                r.getId(),
+                extractOriginalFilename(r.getAudioS3Key()),
+                r.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                normalizeContent(r.getContent())
+        );
+    }
+
     // S3 URL에서 "원본 파일명" 추출 (uuid_파일명 구조)
     private String extractOriginalFilename(String s3Url) {
         if (s3Url == null || s3Url.isBlank()) return "audio";
