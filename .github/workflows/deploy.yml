@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       # ---------------------------------------------------
-      # 1. Spring Boot 빌드 및 이미지 푸시
+      # 1. Spring Boot 빌드 및 이미지 push
       # ---------------------------------------------------
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -46,7 +46,7 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.SPRING_IMAGE_NAME }}:latest
 
       # ---------------------------------------------------
-      # 2. AI Server (FastAPI) 이미지 푸시
+      # 2. AI Server (FastAPI) 이미지 push
       # ---------------------------------------------------
       - name: Build and Push AI Server Image
         uses: docker/build-push-action@v5
