@@ -1,460 +1,639 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EduNote - Quiz</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduNote - 퀴즈 생성 및 풀이</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; background: #f3f4f6; min-height: 100vh; }
+    :root {
+        --primary: #2563eb;
+        --primary-bg: #eff6ff;
+        --text-main: #111827;
+        --text-sub: #6b7280;
+        --bg-body: #ffffff;
+        --bg-sidebar: #f9fafb;
+        --border: #e5e7eb;
+        --sidebar-width: 250px;
 
-    .navbar { background: white; padding: 16px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .left-nav { display:flex; align-items:center; gap:16px; }
-    .btn-back { padding: 8px 12px; border: 1px solid #e5e7eb; background: #f9fafb; border-radius: 8px; cursor:pointer; font-weight:700; }
-    .brand { font-size: 22px; font-weight: 800; color:#111827; }
-    .btn-logout { color: #dc2626; background: none; border: none; cursor: pointer; font-weight: 700; }
+        --success: #10b981;
+        --success-bg: #ecfdf5;
+        --danger: #ef4444;
+        --danger-bg: #fef2f2;
+    }
 
-    .container { max-width: 1200px; margin: 28px auto; padding: 0 20px; display:grid; grid-template-columns: 420px 1fr; gap: 24px; }
+    * {
+        margin: 0; padding: 0; box-sizing: border-box;
+        font-family: 'Pretendard', sans-serif;
+    }
 
-    .card { background:white; border-radius: 14px; padding: 22px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
-    .card h2 { font-size:18px; margin-bottom: 14px; color:#111827; }
+    body {
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        display: flex;
+        min-height: 100vh;
+    }
 
-    .row { display:flex; gap: 10px; }
-    select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #d1d5db; background:#fff; font-weight:700; }
-    .btn-primary { width: 100%; margin-top: 12px; padding: 12px; border: none; border-radius: 10px; background: #2563eb; color: white; font-weight: 800; cursor: pointer; }
-    .btn-primary:disabled { opacity: .6; cursor:not-allowed; }
+    /* --- 사이드바 (공통) --- */
+    .sidebar {
+        width: var(--sidebar-width);
+        background: var(--bg-sidebar);
+        border-right: 1px solid var(--border);
+        height: 100vh;
+        position: fixed; top: 0; left: 0; z-index: 50;
+        display: flex; flex-direction: column; padding: 24px;
+    }
 
-    .quiz-list { display:flex; flex-direction:column; gap: 12px; margin-top: 16px; }
-    .quiz-item { border:1px solid #e5e7eb; border-radius: 12px; padding: 14px; cursor:pointer; transition:.15s; }
-    .quiz-item:hover { border-color:#2563eb; }
-    .quiz-item.active { border-color:#2563eb; background:#eff6ff; }
-    .quiz-item .id { font-weight:900; margin-bottom: 8px; }
-    .quiz-item .meta { color:#6b7280; font-size: 13px; line-height: 1.4; }
+    .logo-area {
+        margin-bottom: 40px; display: flex; align-items: center; gap: 10px;
+        font-size: 20px; font-weight: 600; color: var(--text-main); cursor: pointer;
+    }
+    .logo-icon { color: var(--primary); }
 
-    .play-head { display:flex; justify-content: space-between; align-items:center; margin-bottom: 14px; }
-    .badge { padding: 6px 10px; border-radius: 999px; background:#f3f4f6; font-size: 12px; font-weight: 900; color:#111827; border:1px solid #e5e7eb; }
+    .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .nav-item {
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px 16px; color: var(--text-sub); text-decoration: none;
+        border-radius: 8px; font-size: 15px; font-weight: 500; transition: all 0.2s;
+    }
+    .nav-item:hover { background: #f3f4f6; color: var(--text-main); }
+    .nav-item.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-weight: 600; border: 1px solid var(--border); }
+    .nav-item.back-btn { color: var(--text-main); font-weight: 600; }
 
-    .empty { padding: 14px; border: 1px dashed #d1d5db; border-radius: 12px; color:#6b7280; background:#fafafa; }
+    .user-profile {
+        margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border);
+        display: flex; align-items: center; gap: 12px;
+    }
+    .avatar {
+        width: 36px; height: 36px; background: #e5e7eb; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 600; font-size: 14px; color: var(--text-sub);
+    }
+    .user-info { flex: 1; font-size: 14px; font-weight: 600; }
+    .logout-btn { background: none; border: none; cursor: pointer; color: var(--text-sub); }
+    .logout-btn:hover { color: #ef4444; }
 
-    .qwrap { display:flex; flex-direction:column; gap: 16px; margin-top: 10px; }
-    .qcard { border:1px solid #e5e7eb; border-radius: 14px; padding: 16px; }
-    .qtitle { font-weight: 900; margin-bottom: 10px; color:#111827; }
-    .opt { display:flex; flex-direction:column; gap: 8px; margin-top: 10px; }
-    .opt label { display:flex; gap:10px; align-items:center; padding:10px; border:1px solid #e5e7eb; border-radius: 10px; cursor:pointer; }
-    .opt label:hover { border-color:#2563eb; }
-    .short-input { width:100%; padding: 12px; border-radius: 10px; border: 1px solid #d1d5db; margin-top: 10px; font-weight:700; }
 
-    .actions { display:flex; gap: 10px; margin-top: 12px; }
-    .btn-check { padding: 10px 12px; border:none; border-radius: 10px; background:#10b981; color:#fff; font-weight: 900; cursor:pointer; }
-    .btn-explain { padding: 10px 12px; border:1px solid #e5e7eb; border-radius: 10px; background:#f9fafb; font-weight: 900; cursor:pointer; }
+    /* --- 메인 컨텐츠 --- */
+    .main-content {
+        flex: 1; margin-left: var(--sidebar-width);
+        display: flex; flex-direction: column; height: 100vh;
+        overflow: hidden;
+    }
 
-    .result { margin-top: 10px; font-weight: 900; }
-    .result.ok { color:#059669; }
-    .result.no { color:#dc2626; }
-    .answer { margin-top: 6px; color:#111827; font-weight:800; }
-    .explain { margin-top: 8px; padding: 12px; border-radius: 12px; background:#f3f4f6; border:1px solid #e5e7eb; color:#111827; display:none; white-space:pre-wrap; }
+    .top-toolbar {
+        height: 70px; border-bottom: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0 40px; background: white; flex-shrink: 0;
+    }
+    .page-title h1 { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+    .page-title p { font-size: 13px; color: var(--text-sub); }
 
-    .loading { position: fixed; inset:0; background: rgba(255,255,255,0.75); display:none; justify-content:center; align-items:center; flex-direction:column; z-index: 9999; }
-    .spinner { width: 42px; height:42px; border: 4px solid #e5e7eb; border-top:4px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { 0%{ transform: rotate(0deg);} 100%{ transform: rotate(360deg);} }
+    /* --- 퀴즈 레이아웃 (2단 그리드) --- */
+    .quiz-workspace {
+        display: flex; flex: 1; overflow: hidden;
+        background: #f8fafc; /* 전체 배경 약간 회색 */
+    }
+
+    /* 왼쪽: 퀴즈 생성 및 목록 */
+    .quiz-sidebar {
+        width: 380px;
+        background: white;
+        border-right: 1px solid var(--border);
+        display: flex; flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .panel-header {
+        padding: 24px; border-bottom: 1px solid var(--border);
+    }
+    .panel-header h2 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+
+    .create-form {
+        display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .form-row { display: flex; gap: 10px; }
+    select {
+        flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border);
+        font-size: 14px; outline: none; background: white;
+        cursor: pointer;
+    }
+    select:focus { border-color: var(--primary); }
+
+    .btn-create {
+        width: 100%; padding: 12px; border: none; border-radius: 8px;
+        background: var(--primary); color: white; font-weight: 600; font-size: 14px;
+        cursor: pointer; transition: background 0.2s;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-create:hover { background: #1d4ed8; }
+
+    .history-list {
+        flex: 1; padding: 0;
+    }
+    .history-header {
+        padding: 16px 24px; font-size: 13px; font-weight: 600; color: var(--text-sub);
+        border-bottom: 1px solid var(--border); background: #f9fafb;
+    }
+
+    .quiz-item {
+        padding: 16px 24px; border-bottom: 1px solid var(--border);
+        cursor: pointer; transition: background 0.1s;
+    }
+    .quiz-item:hover { background: #f3f4f6; }
+    .quiz-item.active { background: var(--primary-bg); border-left: 4px solid var(--primary); padding-left: 20px; }
+
+    .q-meta { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; color: var(--text-sub); }
+    .q-info { font-weight: 600; font-size: 15px; display: flex; gap: 8px; align-items: center; }
+    .badge { padding: 2px 6px; border-radius: 4px; font-size: 11px; background: #e5e7eb; color: #4b5563; }
+    .badge.easy { background: #dcfce7; color: #166534; }
+    .badge.normal { background: #dbeafe; color: #1e40af; }
+    .badge.hard { background: #fee2e2; color: #991b1b; }
+
+
+    /* 오른쪽: 퀴즈 풀이 영역 */
+    .quiz-play-area {
+        flex: 1; padding: 40px; overflow-y: auto;
+        display: flex; flex-direction: column; gap: 24px; align-items: center;
+    }
+
+    .empty-state {
+        text-align: center; color: var(--text-sub); margin-top: 100px;
+    }
+    .empty-icon { font-size: 48px; color: #d1d5db; margin-bottom: 16px; }
+
+    /* 문제 카드 */
+    .q-card {
+        background: white; width: 100%; max-width: 800px;
+        border-radius: 12px; border: 1px solid var(--border);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        padding: 32px;
+        animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .q-num { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; }
+    .q-text { font-size: 18px; font-weight: 700; line-height: 1.5; margin-bottom: 24px; }
+
+    /* 선택지 / 입력 */
+    .options-grid { display: grid; gap: 12px; }
+    .opt-label {
+        display: flex; align-items: center; gap: 12px; padding: 16px;
+        border: 1px solid var(--border); border-radius: 8px;
+        cursor: pointer; transition: all 0.2s;
+    }
+    .opt-label:hover { border-color: var(--primary); background: var(--primary-bg); }
+    .opt-label input { accent-color: var(--primary); width: 18px; height: 18px; }
+
+    .text-answer {
+        width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 8px;
+        font-size: 16px; outline: none; transition: border-color 0.2s;
+    }
+    .text-answer:focus { border-color: var(--primary); }
+
+    /* 결과 및 해설 */
+    .feedback-area { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); display: none; }
+
+    .result-msg { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .result-msg.correct { color: var(--success); }
+    .result-msg.wrong { color: var(--danger); }
+
+    .explanation {
+        background: #f8fafc; padding: 16px; border-radius: 8px; font-size: 14px; line-height: 1.6; color: #475569;
+    }
+    .correct-answer-text { font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+
+    .card-actions {
+        margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;
+    }
+    .btn-check {
+        background: var(--text-main); color: white; border: none; padding: 10px 20px; border-radius: 6px;
+        font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-check:hover { background: black; }
+
+    .btn-explain {
+        background: white; border: 1px solid var(--border); color: var(--text-main); padding: 10px 20px; border-radius: 6px;
+        font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-explain:hover { background: #f1f5f9; }
+
+    /* 로딩 */
+    .loading-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255, 255, 255, 0.8); z-index: 200; display: none;
+        justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(4px);
+    }
+    .spinner { width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    @media (max-width: 1024px) {
+        .quiz-workspace { flex-direction: column; overflow-y: auto; }
+        .quiz-sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+        .history-list { max-height: 200px; overflow-y: auto; }
+        .main-content { overflow: auto; }
+    }
+    @media (max-width: 768px) {
+        .sidebar { display: none; }
+        .main-content { margin-left: 0; }
+        .top-toolbar { padding: 0 20px; }
+        .quiz-play-area { padding: 20px; }
+    }
   </style>
 </head>
 <body>
 
-<div class="navbar">
-  <div class="left-nav">
-    <button class="btn-back" onclick="goDashboard()">← 대시보드</button>
-    <div class="brand">EduNote Quiz</div>
+<nav class="sidebar">
+  <div class="logo-area" onclick="location.href='/dashboard.html'">
+    <i class="fa-solid fa-shapes logo-icon"></i> EduNote
   </div>
-  <button class="btn-logout" onclick="logout()">로그아웃</button>
-</div>
 
-<div class="container">
-  <div class="card">
-    <h2>새 퀴즈 생성</h2>
-    <div class="row">
-      <select id="quizType">
-        <option value="MULTIPLE_CHOICE">객관식</option>
-        <option value="OX">OX</option>
-        <option value="SHORT_ANSWER" selected>단답형</option>
-      </select>
-      <select id="quizDifficulty">
-        <option value="EASY">EASY</option>
-        <option value="NORMAL" selected>NORMAL</option>
-        <option value="HARD">HARD</option>
-      </select>
+  <div class="nav-menu">
+    <a href="/dashboard.html" class="nav-item back-btn">
+      <i class="fa-solid fa-arrow-left"></i> 대시보드로 이동
+    </a>
+    <div style="height: 1px; background: var(--border); margin: 8px 0;"></div>
+    <a href="#" class="nav-item active"><i class="fa-solid fa-pen-to-square"></i> 퀴즈 풀기</a>
+  </div>
+
+  <div class="user-profile">
+    <div class="avatar" id="userAvatar">U</div>
+    <div class="user-info" id="userNameDisplay">사용자</div>
+    <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+  </div>
+</nav>
+
+<main class="main-content">
+  <header class="top-toolbar">
+    <div class="page-title">
+      <h1>AI 퀴즈 생성기</h1>
+      <p>강의 내용을 바탕으로 맞춤형 퀴즈를 생성하고 풀어보세요.</p>
     </div>
-    <button class="btn-primary" id="btnCreate" onclick="createQuiz()">이 녹음으로 퀴즈 만들기</button>
+  </header>
 
-    <h2 style="margin-top:20px;">퀴즈 기록</h2>
-    <div class="quiz-list" id="quizList"></div>
-  </div>
-
-  <div class="card">
-    <div class="play-head">
-      <div>
-        <h2 style="margin-bottom:6px;">퀴즈 풀기</h2>
-        <div style="color:#6b7280; font-size:13px;">문제를 풀고 “채점”을 눌러보세요.</div>
+  <div class="quiz-workspace">
+    <aside class="quiz-sidebar">
+      <div class="panel-header">
+        <h2>✨ 새 퀴즈 만들기</h2>
+        <div class="create-form">
+          <div class="form-row">
+            <select id="quizType">
+              <option value="MULTIPLE_CHOICE">객관식 (4지선다)</option>
+              <option value="OX">OX 퀴즈</option>
+              <option value="SHORT_ANSWER">단답형</option>
+            </select>
+            <select id="quizDifficulty" style="width: 100px; flex:none;">
+              <option value="EASY">쉬움</option>
+              <option value="NORMAL" selected>보통</option>
+              <option value="HARD">어려움</option>
+            </select>
+          </div>
+          <button class="btn-create" onclick="createQuiz()">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> 생성하기
+          </button>
+        </div>
       </div>
-      <div style="display:flex; gap:8px;">
-        <div class="badge" id="badgeType">TYPE: -</div>
-        <div class="badge" id="badgeLevel">LEVEL: -</div>
+
+      <div class="history-list">
+        <div class="history-header">생성 기록</div>
+        <div id="quizList">
+          <div style="padding: 20px; text-align: center; color: var(--text-sub); font-size: 13px;">
+            생성된 퀴즈가 없습니다.
+          </div>
+        </div>
       </div>
-    </div>
+    </aside>
 
-    <div id="playArea" class="empty">왼쪽에서 퀴즈를 선택하거나 새로 생성하세요.</div>
+    <section class="quiz-play-area" id="playArea">
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fa-regular fa-clipboard"></i></div>
+        <p>왼쪽에서 퀴즈를 선택하거나<br>새로 생성해주세요.</p>
+      </div>
+    </section>
   </div>
-</div>
+</main>
 
-<div class="loading" id="loading">
+<div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
-  <div style="margin-top:12px; font-weight:900; color:#111827;">불러오는 중...</div>
+  <p style="margin-top: 16px; font-weight: 600; color: #374151;">AI가 퀴즈를 생성 중입니다...</p>
 </div>
 
 <script>
   const token = localStorage.getItem('token');
+  const userName = localStorage.getItem('userName');
+
+  // 1. 초기화 및 검증
   if (!token) {
-    alert('로그인이 필요합니다.');
-    location.href = '/index.html';
+      // alert('로그인이 필요합니다.');
+      // location.href = '/index.html';
   }
+
+  document.getElementById('userNameDisplay').textContent = userName || '사용자';
+  if(userName) document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
 
   const qs = new URLSearchParams(location.search);
   const recordId = qs.get('recordId');
 
   if (!recordId) {
-    alert('recordId가 없습니다. 대시보드에서 다시 진입해주세요.');
-    location.href = '/dashboard.html';
+      alert('잘못된 접근입니다 (Record ID 없음).');
+      location.href = '/dashboard.html';
   }
 
   let selectedQuizId = null;
 
-  window.addEventListener('load', () => {
-    loadQuizRecords();
-  });
+  // 2. 초기 로드
+  window.addEventListener('load', loadQuizRecords);
 
-  function showLoading(v){ document.getElementById('loading').style.display = v ? 'flex' : 'none'; }
-
-  function goDashboard(){
-    location.href = '/dashboard.html';
-  }
-
-  function logout(){
-    localStorage.removeItem('token');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userName');
-    location.href = '/index.html';
-  }
+  // --- API & Logic ---
 
   async function readJsonSafe(response) {
-    const ct = response.headers.get('content-type') || '';
-    if (ct.includes('application/json')) return await response.json();
-    const text = await response.text();
-    return { message: text };
+      const ct = response.headers.get('content-type') || '';
+      if (ct.includes('application/json')) return await response.json();
+      const text = await response.text();
+      return { message: text };
   }
 
+  function showLoading(v){ document.getElementById('loadingOverlay').style.display = v ? 'flex' : 'none'; }
+
+  // 퀴즈 목록 불러오기
   async function loadQuizRecords() {
-    showLoading(true);
-    try {
-      const res = await fetch(`/api/v1/quiz/records/${recordId}`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      const api = await readJsonSafe(res);
+      showLoading(true);
+      try {
+          const res = await fetch(`/api/v1/quiz/records/${recordId}`, {
+              headers: { 'Authorization': 'Bearer ' + token }
+          });
+          const api = await readJsonSafe(res);
 
-      if (!res.ok) {
-        alert('퀴즈 기록 조회 실패: ' + (api.message || res.statusText));
-        return;
+          if (!res.ok) throw new Error(api.message || '목록 로드 실패');
+
+          const list = api.data || [];
+          renderQuizList(list);
+
+          if (list.length > 0 && !selectedQuizId) {
+              selectQuiz(list[0].id); // 가장 최근 것 자동 선택
+          }
+
+      } catch(e) {
+          console.error(e);
+      } finally {
+          showLoading(false);
       }
-
-      const list = api.data || [];
-      renderQuizList(list);
-
-      if (list.length > 0) {
-        selectQuiz(list[0].id);
-      }
-
-    } catch(e) {
-      console.error(e);
-      alert('퀴즈 기록 조회 오류: ' + e.message);
-    } finally {
-      showLoading(false);
-    }
   }
 
   function renderQuizList(list){
-    const el = document.getElementById('quizList');
-    el.innerHTML = '';
+      const el = document.getElementById('quizList');
+      el.innerHTML = '';
 
-    if (!list.length) {
-      el.innerHTML = `<div class="empty">아직 생성된 퀴즈가 없어요.</div>`;
-      return;
-    }
-
-    for (const q of list) {
-      const dt = q.createdAt ? new Date(q.createdAt).toLocaleString('ko-KR') : '-';
-      const item = document.createElement('div');
-      item.className = 'quiz-item' + (q.id === selectedQuizId ? ' active' : '');
-
-      item.innerHTML = `
-        <div class="id">#${q.id}</div>
-        <div class="meta">TYPE: ${escapeHtml(q.type)} | LEVEL: ${escapeHtml(q.level)}</div>
-        <div class="meta">생성: ${escapeHtml(dt)}</div>
-      `;
-      item.onclick = () => selectQuiz(q.id);
-      el.appendChild(item);
-    }
-  }
-
-  async function selectQuiz(quizId){
-    selectedQuizId = quizId;
-    await loadQuizRecordsOnlyRedrawActive();
-
-    showLoading(true);
-    try {
-      const res = await fetch(`/api/v1/quiz/${quizId}`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      const api = await readJsonSafe(res);
-
-      if (!res.ok) {
-        alert('퀴즈 조회 실패: ' + (api.message || res.statusText));
-        return;
+      if (!list.length) {
+          el.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-sub); font-size: 13px;">생성된 퀴즈가 없습니다.</div>`;
+          return;
       }
 
-      const q = api.data;
+      list.forEach(q => {
+          const dt = q.createdAt ? new Date(q.createdAt).toLocaleDateString('ko-KR') : '-';
+          const item = document.createElement('div');
+          item.className = 'quiz-item' + (q.id === selectedQuizId ? ' active' : '');
 
-      document.getElementById('badgeType').textContent = 'TYPE: ' + (q.type || '-');
-      document.getElementById('badgeLevel').textContent = 'LEVEL: ' + (q.level || '-');
+          // 배지 스타일
+          let levelClass = 'normal';
+          if(q.level === 'EASY') levelClass = 'easy';
+          if(q.level === 'HARD') levelClass = 'hard';
 
-      // type도 같이 넘김
-      renderQuizPlayArea(q.content, q.type);
+          item.innerHTML = `
+              <div class="q-meta">
+                  <span>#${q.id}</span>
+                  <span>${dt}</span>
+              </div>
+              <div class="q-info">
+                  <span class="badge ${levelClass}">${q.level}</span>
+                  <span>${getTypeName(q.type)}</span>
+              </div>
+          `;
+          item.onclick = () => selectQuiz(q.id);
+          el.appendChild(item);
+      });
+  }
 
-    } catch(e) {
-      console.error(e);
-      alert('퀴즈 조회 오류: ' + e.message);
-    } finally {
-      showLoading(false);
-    }
+  function getTypeName(type) {
+      if(type === 'MULTIPLE_CHOICE') return '객관식';
+      if(type === 'OX') return 'OX 퀴즈';
+      if(type === 'SHORT_ANSWER') return '단답형';
+      return type;
+  }
+
+  // 퀴즈 선택 및 상세 로드
+  async function selectQuiz(quizId){
+      selectedQuizId = quizId;
+
+      // 목록 UI 갱신 (Active 상태 변경을 위해 재렌더링 보단 클래스 토글이 효율적이나 간단하게 리로드)
+      // 여기선 Active 표시를 위해 간단히 전체 목록 다시 그림 (최적화 가능)
+      const items = document.querySelectorAll('.quiz-item');
+      items.forEach(i => i.classList.remove('active'));
+      // (실제론 목록 데이터가 있어야 active를 다시 그릴 수 있음. loadQuizRecords를 부르지 않고 처리하려면 DOM 조작 필요)
+      // 편의상 목록을 다시 불러오지 않고, loadQuizRecords 호출 시 active 처리가 되므로
+      // 아래 loadQuizRecordsOnlyRedrawActive() 같은 함수를 쓰거나,
+      // 그냥 단순히 DOM에서 active 클래스만 옮겨주는게 좋음.
+      // 이번엔 간단히:
+      await loadQuizRecordsOnlyRedrawActive();
+
+      showLoading(true);
+      try {
+          const res = await fetch(`/api/v1/quiz/${quizId}`, {
+              headers: { 'Authorization': 'Bearer ' + token }
+          });
+          const api = await readJsonSafe(res);
+
+          if (!res.ok) throw new Error(api.message || '퀴즈 상세 로드 실패');
+
+          renderQuizPlayArea(api.data.content, api.data.type);
+
+      } catch(e) {
+          console.error(e);
+          alert('오류: ' + e.message);
+      } finally {
+          showLoading(false);
+      }
   }
 
   async function loadQuizRecordsOnlyRedrawActive(){
-    try {
-      const res = await fetch(`/api/v1/quiz/records/${recordId}`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      const api = await readJsonSafe(res);
-      if (res.ok) renderQuizList(api.data || []);
-    } catch(_) {}
+      try {
+          const res = await fetch(`/api/v1/quiz/records/${recordId}`, {
+              headers: { 'Authorization': 'Bearer ' + token }
+          });
+          const api = await readJsonSafe(res);
+          if (res.ok) renderQuizList(api.data || []);
+      } catch(_) {}
   }
 
-  // content가 "[...]" 이거나 {"quiz":"[...]"} 형태여도 모두 지원
-  function parseQuizArray(contentStr){
-    const trimmed = String(contentStr ?? '').trim();
-    if (!trimmed) return null;
-
-    try {
-      const parsed = JSON.parse(trimmed);
-
-      if (Array.isArray(parsed)) return parsed;
-
-      if (parsed && parsed.quiz != null) {
-        if (typeof parsed.quiz === 'string') return JSON.parse(parsed.quiz);
-        if (Array.isArray(parsed.quiz)) return parsed.quiz;
-      }
-
-      return null;
-    } catch(_) {
-      return null;
-    }
-  }
-
+  // 퀴즈 파싱 및 렌더링
   function renderQuizPlayArea(contentStr, quizType){
-    const play = document.getElementById('playArea');
+      const playArea = document.getElementById('playArea');
+      playArea.innerHTML = ''; // 초기화
 
-    const arr = parseQuizArray(contentStr);
-    if (!Array.isArray(arr)) {
-      play.className = 'empty';
-      play.textContent = '퀴즈 내용이 비어있거나 JSON 파싱에 실패했습니다.';
-      return;
-    }
+      let questions = [];
+      try {
+          // JSON 파싱 시도 (문자열일 수 있고, 이미 객체일 수도 있음)
+          const parsed = typeof contentStr === 'string' ? JSON.parse(contentStr) : contentStr;
 
-    const type = String(quizType || '').toUpperCase();
+          if (Array.isArray(parsed)) questions = parsed;
+          else if (parsed && parsed.quiz) {
+              questions = typeof parsed.quiz === 'string' ? JSON.parse(parsed.quiz) : parsed.quiz;
+          }
+      } catch(e) {
+          console.error(e);
+          playArea.innerHTML = `<div class="empty-state"><p>퀴즈 데이터를 불러오는데 실패했습니다.</p></div>`;
+          return;
+      }
 
-    play.className = '';
-    play.innerHTML = '';
+      if (!questions || questions.length === 0) {
+          playArea.innerHTML = `<div class="empty-state"><p>퀴즈 내용이 비어있습니다.</p></div>`;
+          return;
+      }
 
-    const wrap = document.createElement('div');
-    wrap.className = 'qwrap';
+      // 문제 카드 생성
+      questions.forEach((q, idx) => {
+          const card = document.createElement('div');
+          card.className = 'q-card';
 
-    arr.forEach((item, idx) => {
-      const qcard = document.createElement('div');
-      qcard.className = 'qcard';
-
-      const question = item.question ?? `(문제 ${idx+1})`;
-      const options = Array.isArray(item.options) ? item.options : [];
-      const answer = item.answer ?? '';
-      const explanation = item.explanation ?? '';
-
-      qcard.innerHTML = `
-        <div class="qtitle">Q${idx+1}. ${escapeHtml(question)}</div>
-        <div class="qbody" id="qbody-${idx}"></div>
-        <div class="actions">
-          <button class="btn-check" id="btnCheck-${idx}">채점</button>
-          <button class="btn-explain" id="btnExplain-${idx}">해설 보기</button>
-        </div>
-        <div class="result" id="result-${idx}"></div>
-        <div class="answer" id="answer-${idx}"></div>
-        <div class="explain" id="explain-${idx}">${escapeHtml(explanation)}</div>
-      `;
-
-      wrap.appendChild(qcard);
-      const body = qcard.querySelector(`#qbody-${idx}`);
-
-      // type 기준으로 렌더링 고정
-      if (type === 'SHORT_ANSWER') {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'short-input';
-        input.placeholder = '정답을 입력하세요';
-        input.id = `q${idx}_short`;
-        body.appendChild(input);
-      } else {
-        // MULTIPLE_CHOICE / OX 는 선택형 렌더링
-        const effectiveOptions =
-          (options.length > 0) ? options :
-          (type === 'OX' ? ['참', '거짓'] : []);
-
-        const optDiv = document.createElement('div');
-        optDiv.className = 'opt';
-
-        effectiveOptions.forEach((op, oi) => {
-          const label = document.createElement('label');
-          label.innerHTML = `
-            <input type="radio" name="q${idx}" value="${escapeAttr(op)}" />
-            <span>${escapeHtml(op)}</span>
+          // 질문
+          const questionHtml = `
+              <div class="q-num">Question ${idx + 1}</div>
+              <div class="q-text">${q.question}</div>
           `;
-          optDiv.appendChild(label);
-        });
 
-        body.appendChild(optDiv);
-      }
+          // 옵션 (객관식/OX)
+          let optionsHtml = '';
+          const type = String(quizType).toUpperCase();
 
-      qcard.querySelector(`#btnCheck-${idx}`).onclick = () => {
-        const user = getUserAnswer(idx, type !== 'SHORT_ANSWER');
-        const ok = isCorrect(user, answer, type);
+          if (type === 'SHORT_ANSWER') {
+              optionsHtml = `<input type="text" class="text-answer" id="answer-${idx}" placeholder="정답을 입력하세요">`;
+          } else {
+              let opts = q.options || [];
+              if (type === 'OX' && (!opts || opts.length === 0)) opts = ['O', 'X']; // OX 기본값
 
-        const resultEl = qcard.querySelector(`#result-${idx}`);
-        const ansEl = qcard.querySelector(`#answer-${idx}`);
+              optionsHtml = `<div class="options-grid">`;
+              opts.forEach((opt, optIdx) => {
+                  optionsHtml += `
+                      <label class="opt-label">
+                          <input type="radio" name="q-${idx}" value="${opt}">
+                          <span>${opt}</span>
+                      </label>
+                  `;
+              });
+              optionsHtml += `</div>`;
+          }
 
-        if (ok) {
-          resultEl.className = 'result ok';
-          resultEl.textContent = '✅ 정답입니다!';
-          ansEl.textContent = '';
-        } else {
-          resultEl.className = 'result no';
-          resultEl.textContent = '❌ 틀렸습니다.';
-          ansEl.textContent = '정답: ' + (answer || '(정답 없음)');
-        }
-      };
+          // 결과 및 해설 영역 (숨김)
+          const feedbackHtml = `
+              <div class="feedback-area" id="feedback-${idx}">
+                  <div class="result-msg" id="msg-${idx}"></div>
+                  <div class="explanation">
+                      <div class="correct-answer-text">정답: ${q.answer}</div>
+                      ${q.explanation || ''}
+                  </div>
+              </div>
+          `;
 
-      qcard.querySelector(`#btnExplain-${idx}`).onclick = () => {
-        const ex = qcard.querySelector(`#explain-${idx}`);
-        ex.style.display = (ex.style.display === 'none' || !ex.style.display) ? 'block' : 'none';
-      };
-    });
+          // 액션 버튼
+          const actionsHtml = `
+              <div class="card-actions">
+                  <button class="btn-check" onclick="checkAnswer(${idx}, '${type}', '${q.answer.replace(/'/g, "\\'")}')">정답 확인</button>
+              </div>
+          `;
 
-    play.appendChild(wrap);
-  }
-
-  function getUserAnswer(idx, isChoice){
-    if (isChoice) {
-      const checked = document.querySelector(`input[name="q${idx}"]:checked`);
-      return checked ? checked.value : '';
-    }
-    const input = document.getElementById(`q${idx}_short`);
-    return input ? input.value : '';
-  }
-
-  function normalize(s){
-    return String(s ?? '')
-      .trim()
-      .toLowerCase()
-      .replaceAll(/\s+/g, ' ');
-  }
-
-  function normalizeOX(s){
-    const v = normalize(s);
-
-    // OX/참거짓/truefalse 혼용 대응
-    if (['o','⭕','ㅇ','true','t','참','맞다','맞아요','예','yes'].includes(v)) return 'o';
-    if (['x','❌','false','f','거짓','아니다','틀리다','아니오','no'].includes(v)) return 'x';
-
-    return v;
-  }
-
-  function isCorrect(user, answer, type){
-    const t = String(type || '').toUpperCase();
-    if (t === 'OX') {
-      const u = normalizeOX(user);
-      const a = normalizeOX(answer);
-      return a !== '' && u === a;
-    }
-
-    const u = normalize(user);
-    const a = normalize(answer);
-    return a !== '' && u === a;
-  }
-
-  async function createQuiz(){
-    const type = document.getElementById('quizType').value;
-    const difficulty = document.getElementById('quizDifficulty').value;
-
-    showLoading(true);
-    try {
-      const res = await fetch('/api/v1/quiz', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({
-          recordId: Number(recordId),
-          type,
-          difficulty
-        })
+          card.innerHTML = questionHtml + optionsHtml + feedbackHtml + actionsHtml;
+          playArea.appendChild(card);
       });
+  }
 
-      const api = await readJsonSafe(res);
+  // 정답 확인 로직
+  window.checkAnswer = function(idx, type, correctAnswer) {
+      let userAnswer = '';
 
-      if (!res.ok) {
-        alert('퀴즈 생성 실패: ' + (api.message || res.statusText));
-        return;
+      if (type === 'SHORT_ANSWER') {
+          const el = document.getElementById(`answer-${idx}`);
+          userAnswer = el.value.trim();
+      } else {
+          const checked = document.querySelector(`input[name="q-${idx}"]:checked`);
+          userAnswer = checked ? checked.value : '';
       }
 
-      await loadQuizRecords();
-      if (api.data?.id) {
-        selectQuiz(api.data.id);
+      if (!userAnswer) {
+          alert('답을 선택하거나 입력해주세요.');
+          return;
       }
 
-    } catch(e) {
-      console.error(e);
-      alert('퀴즈 생성 오류: ' + e.message);
-    } finally {
-      showLoading(false);
-    }
+      // 정답 비교 (단순 비교)
+      // 실제로는 정규화 등 복잡한 로직이 필요할 수 있음
+      const isCorrect = normalize(userAnswer) === normalize(correctAnswer);
+
+      // UI 업데이트
+      const feedbackEl = document.getElementById(`feedback-${idx}`);
+      const msgEl = document.getElementById(`msg-${idx}`);
+
+      feedbackEl.style.display = 'block';
+      if (isCorrect) {
+          msgEl.className = 'result-msg correct';
+          msgEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> 정답입니다!';
+      } else {
+          msgEl.className = 'result-msg wrong';
+          msgEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> 틀렸습니다.';
+      }
+  };
+
+  function normalize(str) {
+      return String(str).trim().toLowerCase().replace(/\s+/g, ' ');
   }
 
-  function escapeHtml(str) {
-    return String(str ?? '')
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#039;');
+  // 퀴즈 생성
+  async function createQuiz() {
+      const type = document.getElementById('quizType').value;
+      const difficulty = document.getElementById('quizDifficulty').value;
+
+      if(!confirm('새로운 퀴즈를 생성하시겠습니까? (AI 분석에 시간이 소요됩니다)')) return;
+
+      showLoading(true);
+      try {
+          const res = await fetch('/api/v1/quiz', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + token
+              },
+              body: JSON.stringify({
+                  recordId: Number(recordId),
+                  type,
+                  difficulty
+              })
+          });
+
+          const api = await readJsonSafe(res);
+          if (!res.ok) throw new Error(api.message || '생성 실패');
+
+          // 성공 시 목록 갱신 및 해당 퀴즈 선택
+          await loadQuizRecords();
+          if (api.data?.id) {
+              selectQuiz(api.data.id);
+          }
+
+      } catch(e) {
+          console.error(e);
+          alert('오류: ' + e.message);
+      } finally {
+          showLoading(false);
+      }
   }
 
-  function escapeAttr(str) {
-    return escapeHtml(str).replaceAll('`','&#096;');
+  function logout() {
+      if(confirm('로그아웃 하시겠습니까?')) {
+          localStorage.clear();
+          location.href = '/index.html';
+      }
   }
+
 </script>
 
 </body>

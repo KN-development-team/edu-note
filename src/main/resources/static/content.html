@@ -1,408 +1,486 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EduNote - 내용 보기</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduNote - 학습 뷰어</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #2563eb;
+            --primary-bg: #eff6ff;
+            --text-main: #111827;
+            --text-sub: #6b7280;
+            --bg-body: #ffffff;
+            --bg-sidebar: #f9fafb;
+            --border: #e5e7eb;
+            --sidebar-width: 250px;
+            --summary-bg: #f8fafc; /* 요약 섹션 배경 */
+        }
 
-        :root{
-          --bg-0: #f4f9ff;
-          --bg-1: #eaf3ff;
-          --bg-2: #dfeeff;
-
-          --white: #ffffff;
-          --text: #1f2937;
-          --muted: #6b7280;
-          --line: #e5e7eb;
-
-          --primary: #2563eb;
-          --primary-hover: #1d4ed8;
-          --primary-press: #1e40af;
-
-          --danger: #dc2626;
-
-          --card-bg: rgba(255, 255, 255, 0.95);
-          --shadow-md: 0 10px 30px rgba(0,0,0,0.06);
-          --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-
-          --radius-lg: 16px;
-          --radius-md: 12px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', sans-serif;
         }
 
         body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-          background: linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 40%, var(--bg-2) 100%);
-          min-height: 100vh;
-          color: var(--text);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
         }
 
-        /* Navbar: index 톤 */
-        .navbar {
-          background: var(--white);
-          padding: 16px 40px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          border-bottom: 1px solid var(--line);
-          position: sticky;
-          top: 0;
-          z-index: 100;
-          box-shadow: none; /* shadow 대신 border로 깔끔 */
-        }
-        .navbar-brand {
-          font-size: 18px;
-          font-weight: 700;
-          color: var(--text);
-          letter-spacing: -0.3px;
-        }
-        .user-info {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-          font-size: 14px;
-          color: var(--muted);
-          font-weight: 600;
-        }
-        .btn-logout {
-          color: var(--danger);
-          background: none;
-          border: none;
-          cursor: pointer;
-          font-weight: 700;
-          padding: 8px 10px;
-          border-radius: 8px;
-          transition: background 0.2s;
-        }
-        .btn-logout:hover { background: rgba(220,38,38,0.06); }
-
-        .container {
-          max-width: 1000px;
-          margin: 40px auto;
-          padding: 0 20px;
+        /* --- 1. 사이드바 (대시보드와 동일) --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
         }
 
-        /* Card: 부드러운 유리감(blur 없이 렉 방지) */
-        .card {
-          background: var(--card-bg);
-          border-radius: var(--radius-lg);
-          padding: 30px;
-          border: 1px solid rgba(229,231,235,0.85);
-          box-shadow: var(--shadow-md);
+        .logo-area {
+            margin-bottom: 40px;
+            display: flex; align-items: center; gap: 10px;
+            font-size: 20px; font-weight: 600; color: var(--text-main);
+            cursor: pointer;
+        }
+        .logo-icon { color: var(--primary); }
+
+        .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-sub); text-decoration: none;
+            border-radius: 8px; font-size: 15px; font-weight: 500;
+            transition: all 0.2s;
+        }
+        .nav-item:hover { background: #f3f4f6; color: var(--text-main); }
+        .nav-item.back-btn { color: var(--text-main); font-weight: 600; }
+
+        /* 활성화된 메뉴 스타일 (퀴즈 페이지와 통일) */
+        .nav-item.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            font-weight: 600;
+            border: 1px solid var(--border);
         }
 
-        #title{
-          font-size: 20px;
-          letter-spacing: -0.3px;
-          margin-bottom: 6px;
+        .user-profile {
+            margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border);
+            display: flex; align-items: center; gap: 12px;
+        }
+        .avatar {
+            width: 36px; height: 36px; background: #e5e7eb; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 14px; color: var(--text-sub);
+        }
+        .user-info { flex: 1; font-size: 14px; font-weight: 600; }
+        .logout-btn { background: none; border: none; cursor: pointer; color: var(--text-sub); }
+        .logout-btn:hover { color: #ef4444; }
+
+        /* --- 2. 메인 컨텐츠 --- */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 0; /* 헤더가 꽉 차게 */
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden; /* 내부 스크롤 사용 */
         }
 
-        .meta {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px 20px;
-          margin: 10px 0 20px;
-          color: var(--muted);
-          font-size: 13px;
+        /* 상단 헤더 (Toolbar) */
+        .top-toolbar {
+            height: 70px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            background: white;
+            flex-shrink: 0;
         }
-        .meta strong{ color: var(--text); }
 
-        /* content box */
+        .doc-title-wrapper { display: flex; align-items: center; gap: 16px; }
+        .back-icon {
+            font-size: 18px; color: var(--text-sub); cursor: pointer; padding: 8px; border-radius: 50%; transition: background 0.2s;
+        }
+        .back-icon:hover { background: #f3f4f6; color: var(--text-main); }
+
+        .doc-info h1 { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+        .doc-meta { font-size: 12px; color: var(--text-sub); display: flex; gap: 10px; align-items: center;}
+        .doc-meta span { display: flex; align-items: center; gap: 4px; }
+
+        /* 워크스페이스 레이아웃 (좌:본문, 우:요약) */
+        .workspace-grid {
+            display: flex;
+            height: 100%;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        /* 왼쪽: 스크립트 영역 */
+        .script-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 60px;
+            border-right: 1px solid var(--border);
+        }
+
+        .panel-label {
+            font-size: 13px; font-weight: 600; color: var(--primary);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 20px; display: block;
+        }
+
         .content-box {
-          border: 1px solid var(--line);
-          border-radius: var(--radius-md);
-          padding: 18px;
-          background: rgba(249,250,251,0.85);
-          white-space: pre-wrap;
-          line-height: 1.7;
-          color: #111827;
-          font-size: 15px;
+            font-size: 16px; line-height: 1.8; color: #374151;
+            white-space: pre-wrap; word-break: break-all;
         }
 
-        /* summary box: 노란 느낌을 살리되 과하지 않게 */
-        #summaryBox h3{
-          margin-bottom: 8px;
-          font-size: 15px;
-          letter-spacing: -0.2px;
-          color: var(--text);
-        }
-        #summaryText{
-          background: #fff8db;         /* 기존 #fffbe6보다 살짝 톤다운 */
-          border-color: #fde68a;       /* 따뜻한 라인 */
-          color: #92400e;
+        /* 오른쪽: AI 요약 영역 */
+        .summary-panel {
+            width: 400px;
+            background: var(--summary-bg);
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--border);
         }
 
-        .actions {
-          display: flex;
-          gap: 10px;
-          margin-top: 18px;
-          flex-wrap: wrap;
+        .summary-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 8px;
+            font-weight: 700; font-size: 16px; color: var(--text-main);
+            background: white;
         }
 
-        .btn {
-          padding: 10px 14px;
-          border-radius: 10px;
-          border: 1px solid transparent;
-          cursor: pointer;
-          font-weight: 800;
-          font-size: 13px;
-          transition: transform 0.02s, background 0.2s, border-color 0.2s;
-          user-select: none;
+        .summary-content-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #4b5563;
         }
-        .btn:active { transform: translateY(1px); }
 
-        .btn-back {
-          background: white;
-          color: var(--text);
-          border-color: #d1d5db;
+        /* 요약 내용 스타일 */
+        #summaryText { white-space: pre-wrap; }
+
+        /* 요약 없을 때 Empty State */
+        .empty-summary {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-sub);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100%;
         }
-        .btn-back:hover { background: #f9fafb; }
 
-        .btn-copy {
-          background: var(--primary);
-          color: white;
+        .empty-icon {
+            width: 48px; height: 48px;
+            background: white; border: 1px solid var(--border);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            color: var(--primary); font-size: 20px; margin-bottom: 16px;
         }
-        .btn-copy:hover { background: var(--primary-hover); }
-        .btn-copy:active { background: var(--primary-press); }
 
-        /* Loading overlay */
+        /* 버튼 스타일 */
+        .btn-primary {
+            background: var(--primary); color: white;
+            padding: 12px 24px; border-radius: 8px; border: none;
+            font-weight: 600; font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            transition: background 0.2s;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+        }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-primary:disabled { background: #9ca3af; cursor: not-allowed; box-shadow: none; }
+
+        /* 로딩 오버레이 */
         .loading-overlay {
-          position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-          background: rgba(244, 249, 255, 0.85);
-          display: none;
-          justify-content: center;
-          align-items: center;
-          flex-direction: column;
-          z-index: 2000;
-          backdrop-filter: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 200; display: none;
+            justify-content: center; align-items: center; flex-direction: column;
+            backdrop-filter: blur(4px);
         }
         .spinner {
-          width: 40px; height: 40px;
-          border: 4px solid #e5e7eb; border-top: 4px solid var(--primary);
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
+            width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top-color: var(--primary);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* 반응형 */
+        @media (max-width: 1024px) {
+            .workspace-grid { flex-direction: column; overflow-y: auto; }
+            .script-panel { border-right: none; border-bottom: 1px solid var(--border); padding: 30px; }
+            .summary-panel { width: 100%; border-left: none; height: auto; min-height: 400px; }
+            .main-content { overflow: auto; }
+        }
 
         @media (max-width: 768px) {
-          .navbar { padding: 14px 20px; }
-          .navbar-brand {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -0.3px;
-          }
-          .container { margin: 24px auto; }
-          .card { padding: 22px; border-radius: 14px; }
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+            .top-toolbar { padding: 0 20px; }
+            .script-panel { padding: 24px; }
         }
     </style>
-
 </head>
 <body>
 
-<div class="navbar">
-    <div class="navbar-brand">EduNote 내용 보기</div>
-    <div class="user-info">
-        <span id="userNameDisplay">사용자님</span>
-        <button class="btn-logout" onclick="logout()">로그아웃</button>
+<nav class="sidebar">
+    <div class="logo-area" onclick="location.href='/dashboard.html'">
+        <i class="fa-solid fa-shapes logo-icon"></i> EduNote
     </div>
-</div>
 
-<div class="container">
-    <div class="card">
-        <h2 id="title">📄 내용</h2>
-        <div class="meta">
-            <div>파일명: <strong id="fileName">-</strong></div>
-            <div>업로드 날짜: <strong id="createdAt">-</strong></div>
+    <div class="nav-menu">
+        <a href="/dashboard.html" class="nav-item back-btn">
+            <i class="fa-solid fa-arrow-left"></i> 대시보드로 이동
+        </a>
+        <div style="height: 1px; background: var(--border); margin: 8px 0;"></div>
+
+        <a href="#" class="nav-item active"><i class="fa-solid fa-file-lines"></i> 문서 보기</a>
+    </div>
+
+    <div class="user-profile">
+        <div class="avatar" id="userAvatar">U</div>
+        <div class="user-info" id="userNameDisplay">사용자</div>
+        <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+    </div>
+</nav>
+
+<main class="main-content">
+
+    <header class="top-toolbar">
+        <div class="doc-title-wrapper">
+            <div class="back-icon" onclick="location.href='/dashboard.html'">
+                <i class="fa-solid fa-chevron-left"></i>
+            </div>
+            <div class="doc-info">
+                <h1 id="fileName">로딩 중...</h1>
+                <div class="doc-meta">
+                    <span id="createdAt"><i class="fa-regular fa-calendar"></i> -</span>
+                    <span><i class="fa-solid fa-circle-check" style="color:#22c55e;"></i> 변환 완료</span>
+                </div>
+            </div>
+        </div>
+        <div>
+        </div>
+    </header>
+
+    <div class="workspace-grid">
+
+        <div class="script-panel">
+            <span class="panel-label">Original Script</span>
+            <div id="contentText" class="content-box">
+                내용을 불러오고 있습니다...
+            </div>
         </div>
 
-        <div class="content-box" id="contentText">불러오는 중...</div>
+        <div class="summary-panel">
+            <div class="summary-header">
+                <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--primary);"></i> AI 요약 노트
+            </div>
 
-        <div id="summaryBox" style="margin-top:18px; display:none;">
-          <h3 style="margin-bottom:8px;">📝 요약 결과</h3>
-          <div class="content-box" id="summaryText" style="background:#fffbe6; border-color:#fef3c7; color:#92400e;"></div>
-        </div>
+            <div class="summary-content-area" id="summaryArea">
+                <div id="emptySummary" class="empty-summary">
+                    <div class="empty-icon">
+                        <i class="fa-regular fa-lightbulb"></i>
+                    </div>
+                    <p style="margin-bottom: 20px; font-weight: 500;">아직 요약된 내용이 없습니다.</p>
+                    <button class="btn-primary" id="summarizeBtn" onclick="summarizeRecord()">
+                        <span>AI 요약 생성하기</span>
+                    </button>
+                </div>
 
-        <div class="actions">
-          <button class="btn btn-back" onclick="goBack()">← 대시보드</button>
-          <button class="btn btn-copy" id="summarizeBtn" onclick="summarizeRecord()" style="display:none;">요약하기</button>
+                <div id="summaryText" style="display: none;"></div>
+            </div>
         </div>
     </div>
-</div>
+</main>
 
 <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
-    <p style="margin-top: 15px; font-weight: 600; color: #374151;">AI가 열심히 작업 중입니다...</p>
+    <p style="margin-top: 16px; font-weight: 600; color: #374151;">데이터 처리 중...</p>
 </div>
 
 <script>
     const token = localStorage.getItem('token');
     const userName = localStorage.getItem('userName');
-    if (!token) {
-      alert('로그인이 필요합니다.');
-      window.location.href = '/index.html';
-    }
-    document.getElementById('userNameDisplay').textContent = (userName || '사용자') + '님';
 
+    // 1. 로그인 체크
+    if (!token) {
+        // alert('로그인이 필요합니다.');
+        // window.location.href = '/index.html';
+    }
+
+    // 2. UI 초기화
+    document.getElementById('userNameDisplay').textContent = userName || '사용자';
+    if(userName) document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
+
+    // 3. URL 파라미터 확인
     const params = new URLSearchParams(window.location.search);
     const recordId = params.get('recordId');
 
     if (!recordId) {
-      alert('recordId가 없습니다.');
-      window.location.href = '/dashboard.html';
+        alert('잘못된 접근입니다 (Record ID 없음).');
+        window.location.href = '/dashboard.html';
     }
 
+    // --- Helper Functions ---
     async function readJsonSafe(response) {
-      const ct = response.headers.get('content-type') || '';
-      if (ct.includes('application/json')) return await response.json();
-      const text = await response.text();
-      return { message: text };
+        const ct = response.headers.get('content-type') || '';
+        if (ct.includes('application/json')) return await response.json();
+        const text = await response.text();
+        return { message: text };
     }
 
     function showLoading(isShow) {
-      document.getElementById('loadingOverlay').style.display = isShow ? 'flex' : 'none';
+        document.getElementById('loadingOverlay').style.display = isShow ? 'flex' : 'none';
     }
 
     function formatDate(v) {
-      if (!v) return '-';
-      const d = new Date(v);
-      if (isNaN(d.getTime())) return String(v);
-      return d.toLocaleDateString('ko-KR');
+        if (!v) return '-';
+        const d = new Date(v);
+        if (isNaN(d.getTime())) return String(v);
+        return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     }
 
-    // 1) 가능한 경우: 상세 조회 API를 우선 시도 (/api/v1/stt/records/{id})
-    // 2) 없으면: 목록 API로 가져와서 id로 찾기 (/api/v1/stt/records)
+    // --- Main Logic ---
+
+    // 1. 기록 데이터 불러오기
     async function loadRecord() {
-      showLoading(true);
-      try {
+        showLoading(true);
+        try {
+            // (1) 목록 API에서 해당 레코드 찾기 (상세 API가 있다면 그것을 사용)
+            const resp = await fetch('/api/v1/stt/records', {
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
 
-        // fallback: list endpoint
-        const resp = await fetch('/api/v1/stt/records', {
-          method: 'GET',
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
+            const api = await readJsonSafe(resp);
+            if (!resp.ok) throw new Error(api.message || '데이터 로드 실패');
 
-        const api = await readJsonSafe(resp);
-        if (!resp.ok) {
-          alert('기록 불러오기 실패: ' + (api.message || resp.statusText));
-          showLoading(false);
-          return;
+            const records = api.data || [];
+            const found = records.find(x => String(x.id) === String(recordId));
+
+            if (!found) {
+                alert('해당 기록을 찾을 수 없습니다.');
+                window.location.href = '/dashboard.html';
+                return;
+            }
+
+            // (2) 화면 렌더링
+            renderRecord(found);
+
+            // (3) 기존 요약이 있는지 확인
+            await loadExistingSummary();
+
+        } catch (e) {
+            console.error(e);
+            alert('오류 발생: ' + e.message);
+        } finally {
+            showLoading(false);
         }
-
-        const records = api.data || [];
-        const found = records.find(x => String(x.id) === String(recordId));
-
-        if (!found) {
-          alert('해당 recordId의 기록을 찾을 수 없습니다.');
-          showLoading(false);
-          return;
-        }
-
-        renderRecord(found);
-
-      } catch (e) {
-        console.error(e);
-        alert('오류 발생: ' + e.message);
-      } finally {
-        showLoading(false);
-        // 레코드 로드 완료 후 기존 요약 로드 시도
-        await loadExistingSummary();
-      }
     }
 
     function renderRecord(r) {
-      const fileName = r.fileName || ('record #' + (r.id ?? recordId));
-      const createdAt = r.createdAt;
+        const fileName = r.fileName || ('녹음 기록 #' + recordId);
+        document.getElementById('fileName').textContent = fileName;
+        document.getElementById('createdAt').innerHTML = `<i class="fa-regular fa-calendar"></i> ${formatDate(r.createdAt)}`;
 
-      document.getElementById('fileName').textContent = fileName;
-      document.getElementById('createdAt').textContent = formatDate(createdAt);
-
-      const text = (r.text && String(r.text).trim()) ? r.text : '내용 없음';
-      document.getElementById('contentText').textContent = text;
+        const text = (r.text && String(r.text).trim()) ? r.text : '(변환된 텍스트가 없습니다)';
+        document.getElementById('contentText').textContent = text;
     }
 
-async function loadExistingSummary() {
-  try {
-    const resp = await fetch(`/api/records/${encodeURIComponent(recordId)}/summary`, {
-      method: 'GET',
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
+    // 2. 요약 확인 및 로드
+    async function loadExistingSummary() {
+        try {
+            const resp = await fetch(`/api/records/${encodeURIComponent(recordId)}/summary`, {
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
 
-    if (resp.ok) {
-      const api = await readJsonSafe(resp);
-      const data = api.data || {};
-      const content = data.summary_content || '';
+            if (resp.ok) {
+                const api = await readJsonSafe(resp);
+                const data = api.data || {};
+                const content = data.summary_content || '';
 
-      if (String(content).trim()) {
-        document.getElementById('summaryText').textContent = content;
-        document.getElementById('summaryBox').style.display = 'block';
-        document.getElementById('summarizeBtn').style.display = 'none';
-        return;
-      }
+                if (String(content).trim()) {
+                    // 요약이 있으면 표시
+                    showSummaryContent(content);
+                }
+            }
+        } catch (e) {
+            console.log('기존 요약 로드 실패(없음):', e.message);
+        }
     }
-  } catch (e) {
-    console.log('기존 요약 로드 실패:', e.message);
-  }
 
-  document.getElementById('summarizeBtn').style.display = 'block';
-}
+    // 3. 요약 생성 요청
+    async function summarizeRecord() {
+        if (!confirm('AI 요약을 생성하시겠습니까?')) return;
 
+        const btn = document.getElementById('summarizeBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 생성 중...';
 
-    function goBack() {
-      window.location.href = '/dashboard.html';
+        try {
+            const resp = await fetch(`/api/records/${encodeURIComponent(recordId)}/summary`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            const api = await readJsonSafe(resp);
+            if (!resp.ok) throw new Error(api.message || '요약 실패');
+
+            const data = api.data || api;
+            const content = data.summary_content || data.content || data.summary || '';
+
+            if(content) {
+                showSummaryContent(content);
+            } else {
+                alert('요약 결과가 비어있습니다.');
+                btn.disabled = false;
+                btn.innerHTML = 'AI 요약 생성하기';
+            }
+
+        } catch (e) {
+            console.error(e);
+            alert('오류: ' + e.message);
+            btn.disabled = false;
+            btn.innerHTML = 'AI 요약 생성하기';
+        }
+    }
+
+    // UI Helper: 요약 내용 보여주기 전환
+    function showSummaryContent(text) {
+        document.getElementById('emptySummary').style.display = 'none';
+        const summaryTextEl = document.getElementById('summaryText');
+        summaryTextEl.style.display = 'block';
+        summaryTextEl.textContent = text;
     }
 
     function logout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('userName');
-      window.location.href = '/index.html';
-    }
-
-    async function summarizeRecord() {
-      const btn = document.getElementById('summarizeBtn');
-      try {
-        if (!confirm('요약을 생성하시겠어요?')) return;
-        btn.disabled = true;
-        btn.textContent = '요약중...';
-        showLoading(true);
-
-        const resp = await fetch(`/api/records/${encodeURIComponent(recordId)}/summary`, {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-
-        const api = await readJsonSafe(resp);
-        if (!resp.ok) {
-          throw new Error((api && api.message) || resp.statusText || '요약 요청 실패');
+        if(confirm('로그아웃 하시겠습니까?')) {
+            localStorage.clear();
+            window.location.href = '/index.html';
         }
-
-        const data = api.data || api;
-
-        const content =
-          data.summary_content ||
-          data.content ||
-          data.summary ||
-          '';
-
-        // content가 비어있을 때를 대비한 디버기용
-        const finalText = String(content).trim() ? content : '요약 결과가 비어있습니다.';
-
-        document.getElementById('summaryText').textContent = finalText;
-        document.getElementById('summaryBox').style.display = 'block';
-        btn.style.display = 'none'; // 요약 완료 후 버튼 숨김
-      } catch (e) {
-        console.error(e);
-        alert('요약 중 오류가 발생했습니다: ' + (e.message || e));
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '요약하기';
-        showLoading(false);
-      }
     }
 
+    // 초기 실행
     window.addEventListener('load', loadRecord);
+
 </script>
 
 </body>
