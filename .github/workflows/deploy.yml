@@ -84,13 +84,14 @@ jobs:
                 ports:
                   - "8080:8080"
                 environment:
-                  # ▼▼▼ [수정됨] 님의 GitHub Secrets 이름과 똑같이 맞췄습니다 ▼▼▼
                   - SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
                   - SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
                   - SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
             
                   - AI_SERVER_URL=http://ai-server:8000
                   - OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+                  - GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
+            
             
                   # [AWS S3 설정]
                   - AWS_REGION=ap-northeast-2
@@ -107,6 +108,8 @@ jobs:
                   - "8000:8000"
                 environment:
                   - OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+                  - GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
+
             EOF
 
             # 4. 최신 이미지 Pull 및 컨테이너 재시작
