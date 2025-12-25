@@ -6,29 +6,75 @@
     <title>EduNote - 대시보드</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-          background: #f3f4f6;
-          min-height: 100vh;
+
+        :root{
+          --bg-0: #f4f9ff;
+          --bg-1: #eaf3ff;
+          --bg-2: #dfeeff;
+
+          --white: #ffffff;
+          --text: #1f2937;
+          --muted: #6b7280;
+          --line: #e5e7eb;
+
+          --primary: #2563eb;
+          --primary-hover: #1d4ed8;
+          --primary-press: #1e40af;
+
+          --danger: #dc2626;
+
+          --card-bg: rgba(255, 255, 255, 0.95);
+          --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+          --shadow-md: 0 10px 30px rgba(0,0,0,0.06);
         }
 
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+          background: linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 40%, var(--bg-2) 100%);
+          min-height: 100vh;
+          color: var(--text);
+        }
+
+        /* Navbar: index.html 톤(화이트 + border-bottom)으로 */
         .navbar {
-          background: white;
+          background: var(--white);
           padding: 16px 40px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          border-bottom: 1px solid var(--line);
+          position: sticky;
+          top: 0;
+          z-index: 100;
         }
-        .navbar-brand { font-size: 20px; font-weight: 700; color: #1f2937; }
-        .user-info { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+
+        .navbar-brand {
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--text);
+          letter-spacing: -0.3px;
+        }
+
+        .user-info {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          font-size: 14px;
+          color: var(--muted);
+          font-weight: 500;
+        }
+
         .btn-logout {
-          color: #dc2626;
+          color: var(--danger);
           background: none;
           border: none;
           cursor: pointer;
           font-weight: 600;
+          padding: 8px 10px;
+          border-radius: 6px;
+          transition: background 0.2s;
         }
+        .btn-logout:hover { background: rgba(220,38,38,0.06); }
 
         .container {
           max-width: 1000px;
@@ -36,90 +82,141 @@
           padding: 0 20px;
         }
 
+        /* Card: index의 auth-container 느낌(유리감 + 라운드 + 부드러운 그림자) */
         .card {
-          background: white;
-          border-radius: 12px;
+          background: var(--card-bg);
+          border-radius: 16px;
           padding: 30px;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-          margin-bottom: 30px;
+          box-shadow: var(--shadow-md);
+          border: 1px solid rgba(229, 231, 235, 0.8);
+          margin-bottom: 24px;
+          backdrop-filter: none;
         }
-        .card h2 { margin-bottom: 20px; font-size: 20px; color: #1f2937; }
 
+        .card h2 {
+          margin-bottom: 18px;
+          font-size: 20px;
+          color: var(--text);
+          letter-spacing: -0.3px;
+        }
+
+        /* Upload */
         .upload-area {
-          border: 2px dashed #e5e7eb;
-          border-radius: 8px;
-          padding: 40px;
+          border: 2px dashed var(--line);
+          border-radius: 12px;
+          padding: 38px;
           text-align: center;
           transition: all 0.2s;
           cursor: pointer;
+          background: rgba(249, 250, 251, 0.6);
         }
-        .upload-area:hover { border-color: #2563eb; background: #f8fafc; }
+        .upload-area:hover {
+          border-color: var(--primary);
+          background: rgba(255, 255, 255, 0.9);
+          box-shadow: 0 4px 20px rgba(37, 99, 235, 0.08);
+        }
         .upload-icon { font-size: 40px; color: #9ca3af; margin-bottom: 10px; }
         .file-input { display: none; }
+
         .btn-upload {
-          margin-top: 15px;
+          margin-top: 14px;
           padding: 10px 24px;
-          background: #2563eb;
+          background: var(--primary);
           color: white;
           border: none;
           border-radius: 6px;
           font-weight: 600;
           cursor: pointer;
           display: none;
+          transition: background 0.2s;
         }
+        .btn-upload:hover { background: var(--primary-hover); }
+        .btn-upload:active { background: var(--primary-press); }
 
-        .record-list { display: flex; flex-direction: column; gap: 15px; }
+        /* Record list */
+        .record-list { display: flex; flex-direction: column; gap: 12px; }
+
         .record-item {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 20px;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          transition: 0.2s;
+          padding: 18px;
+          border: 1px solid var(--line);
+          border-radius: 12px;
+          background: rgba(255,255,255,0.8);
+          transition: all 0.2s;
         }
-        .record-item:hover { border-color: #2563eb; }
-        .record-info h3 { font-size: 16px; margin-bottom: 4px; }
-        .record-info p { font-size: 13px; color: #6b7280; }
+        .record-item:hover {
+          border-color: var(--primary);
+          box-shadow: 0 4px 20px rgba(37, 99, 235, 0.08);
+          transform: translateY(-1px);
+        }
+
+        .record-info h3 { font-size: 16px; margin-bottom: 6px; color: var(--text); }
+        .record-info p { font-size: 13px; color: var(--muted); }
 
         .action-buttons { display: flex; gap: 8px; }
+
+        /* Buttons: index의 버튼 톤(블루 primary + 뉴트럴 secondary) */
+        .btn-view {
+          padding: 8px 14px;
+          background: white;
+          color: var(--text);
+          border: 1px solid #d1d5db;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .btn-view:hover { background: #f9fafb; }
+
         .btn-quiz {
-          padding: 8px 16px;
-          background: #10b981;
+          padding: 8px 14px;
+          background: var(--primary);
           color: white;
           border: none;
           border-radius: 6px;
           font-size: 13px;
           font-weight: 600;
           cursor: pointer;
+          transition: background 0.2s;
         }
-        .btn-view {
-          padding: 8px 16px;
-          background: #f3f4f6;
-          color: #374151;
-          border: none;
-          border-radius: 6px;
-          font-size: 13px;
-          font-weight: 600;
-          cursor: pointer;
-        }
+        .btn-quiz:hover { background: var(--primary-hover); }
+        .btn-quiz:active { background: var(--primary-press); }
 
+        /* Loading overlay: 더 자연스럽게 */
         .loading-overlay {
           position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-          background: rgba(255,255,255,0.8);
+          background: rgba(244, 249, 255, 0.75);
           display: none;
           justify-content: center;
           align-items: center;
           flex-direction: column;
           z-index: 2000;
+          backdrop-filter: blur(6px);
         }
         .spinner {
           width: 40px; height: 40px;
-          border: 4px solid #e5e7eb; border-top: 4px solid #2563eb;
-          border-radius: 50%; animation: spin 1s linear infinite;
+          border: 4px solid #e5e7eb; border-top: 4px solid var(--primary);
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+          .navbar {
+            padding: 14px 20px;
+            will-change: transform;
+          }
+          .navbar-brand { font-size: 16px; }
+          .container { margin: 24px auto; }
+          .card { padding: 22px; border-radius: 14px; }
+          .upload-area { padding: 28px; }
+          .record-item { padding: 14px; }
+        }
     </style>
+
 </head>
 <body>
 
