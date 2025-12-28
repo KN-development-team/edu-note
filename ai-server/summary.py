@@ -37,14 +37,28 @@ class SummaryService:
     def __init__(self):
         self.api_key = os.getenv("GOOGLE_API_KEY")
         genai.configure(api_key = self.api_key) # import한 genai 모듈에 api_key 저장
-        self.model = genai.GenerativeModel("gemini-3-pro-preview")
+        self.model = genai.GenerativeModel("gemini-2.5-flash")
 
     def generate_summary(self, content: str) -> str:
         try:
-            prompt = f"너는 교육 자료를 요약해주는 유능한 조교야. 다음 내용을 명확하고 간결하게 3줄 내외로 요약해줘:\n\n{content}."
+            prompt = f"""
+            너는 교육 자료를 요약해주는 유능한 조교야.
+            다음 내용을 읽고 반드시 아래 형식을 지켜서 요약해줘:
+
+            1. 명확하고 간결한 문장으로 작성할 것.
+            2. 반드시 개조식(bullet points)을 사용하여 3줄로 요약할 것.
+            3. 각 줄은 '- '로 시작할 것.
+            4. 각 '-' 가 시작될 때마다 한줄씩 띄워서 가독성을 높일것.
+
+            내용:
+            {content}
+            """
 
             # Gemini 호출
-            response = self.model.generate_content(prompt)
+            response = self.model.generate_content(
+                prompt,
+                generation_config={"temperature": 0.0} # AI가 창의성을 배제하고 일관된 답변 생성
+            )
 
             return response.text
         except Exception as e:
