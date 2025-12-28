@@ -145,9 +145,21 @@
             margin-bottom: 20px; display: block;
         }
 
+        /* 원본 스크립트 가독성 개선 */
         .content-box {
-            font-size: 16px; line-height: 1.8; color: #374151;
-            white-space: pre-wrap; word-break: break-all;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #374151;
+
+            /* 기존: white-space: pre-wrap; word-break: break-all; */
+            white-space: normal;      /* p 태그로 문단 처리 */
+            word-break: keep-all;     /* 한국어 가독성 */
+            overflow-wrap: anywhere;  /* 긴 URL/영문 줄바꿈 */
+        }
+
+        /* 문단 간격 */
+        .content-box p {
+            margin: 0 0 14px;
         }
 
         /* 오른쪽: AI 요약 영역 */
@@ -357,6 +369,63 @@
         return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     }
 
+    /* 문장 분리 + 문단 렌더링 */
+
+    // 한국어 문장 분리 (지원되면 Intl.Segmenter 사용)
+    function splitSentencesKo(text) {
+        text = (text || '').replace(/\s+/g, ' ').trim();
+        if (!text) return [];
+
+        // 최신 브라우저: 문장 단위 분리 정확도 좋음
+        if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+            const seg = new Intl.Segmenter('ko', { granularity: 'sentence' });
+            return Array.from(seg.segment(text), x => x.segment.trim()).filter(Boolean);
+        }
+
+        // fallback(간단 휴리스틱)
+        const marker = '\u0000';
+        const tmp = text
+            .replace(/([!?])\s+/g, `$1${marker}`)
+            .replace(/([.])\s+/g, `.${marker}`)
+            .replace(/(다|요|니다)\.\s+/g, `$1.${marker}`);
+
+        return tmp.split(marker).map(s => s.trim()).filter(Boolean);
+    }
+
+    // 문장들을 적당한 길이로 묶어 문단(<p>)으로 렌더링
+    function renderTranscriptAsParagraphs(el, text) {
+        el.innerHTML = '';
+
+        const raw = (text && String(text).trim()) ? String(text).trim() : '';
+        if (!raw) {
+            el.textContent = '(변환된 텍스트가 없습니다)';
+            return;
+        }
+
+        const sentences = splitSentencesKo(raw);
+        const units = (sentences.length >= 2) ? sentences : [raw];
+
+        const MAX_CHARS_PER_PARA = 320; // 문단 길이(원하는대로 조절)
+        let buf = '';
+
+        const flush = () => {
+            const t = buf.trim();
+            if (!t) return;
+            const p = document.createElement('p');
+            p.textContent = t; // XSS 안전
+            el.appendChild(p);
+            buf = '';
+        };
+
+        for (const s of units) {
+            if (!buf) buf = s;
+            else buf += ' ' + s;
+
+            if (buf.length >= MAX_CHARS_PER_PARA) flush();
+        }
+        flush();
+    }
+
     // --- Main Logic ---
 
     // 1. 기록 데이터 불러오기
@@ -384,7 +453,7 @@
             // (2) 화면 렌더링
             renderRecord(found);
 
-            // (3) 기존 요약이 있는지 확인
+            // (3) 기존 요약이 있는지 확인 (요약은 그대로)
             await loadExistingSummary();
 
         } catch (e) {
@@ -400,11 +469,14 @@
         document.getElementById('fileName').textContent = fileName;
         document.getElementById('createdAt').innerHTML = `<i class="fa-regular fa-calendar"></i> ${formatDate(r.createdAt)}`;
 
-        const text = (r.text && String(r.text).trim()) ? r.text : '(변환된 텍스트가 없습니다)';
-        document.getElementById('contentText').textContent = text;
+        const text = (r.text && String(r.text).trim()) ? r.text : '';
+
+        // textContent 대신 문단 렌더
+        const el = document.getElementById('contentText');
+        renderTranscriptAsParagraphs(el, text);
     }
 
-    // 2. 요약 확인 및 로드
+    // 2. 요약 확인 및 로드 (그대로 둠)
     async function loadExistingSummary() {
         try {
             const resp = await fetch(`/api/records/${encodeURIComponent(recordId)}/summary`, {
@@ -427,7 +499,7 @@
         }
     }
 
-    // 3. 요약 생성 요청
+    // 3. 요약 생성 요청 (그대로 둠)
     async function summarizeRecord() {
         if (!confirm('AI 요약을 생성하시겠습니까?')) return;
 
@@ -463,7 +535,7 @@
         }
     }
 
-    // UI Helper: 요약 내용 보여주기 전환
+    // UI Helper: 요약 내용 보여주기 전환 (그대로)
     function showSummaryContent(text) {
         document.getElementById('emptySummary').style.display = 'none';
         const summaryTextEl = document.getElementById('summaryText');
