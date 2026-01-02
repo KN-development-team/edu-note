@@ -97,8 +97,7 @@ jobs:
             
                   # [AWS S3 설정]
                   - AWS_REGION=ap-northeast-2
-                  - AWS_S3_BUCKET=edu-note-files-2025
-                  # (이 두 개는 아직 Secrets에 없으면 꼭 추가해야 합니다!)
+                  - AWS_S3_BUCKET=edu-note-files
                   - AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
                   - AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
                 depends_on:
