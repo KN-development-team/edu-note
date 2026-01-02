@@ -32,7 +32,7 @@ public class QuizController {
         return ResponseEntity.ok(ApiResponse.success("퀴즈 기록 조회 성공", list));
     }
 
-    // quizId로 퀴즈 1개 상세 조회 (프론트가 클릭 시 호출하는 API)
+    // quizId로 퀴즈 1개 상세 조회
     @GetMapping("/{quizId}")
     public ResponseEntity<ApiResponse<QuizResponseDto>> getQuizDetail(
             @PathVariable("quizId") Long quizId
